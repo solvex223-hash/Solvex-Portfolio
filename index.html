@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="SolveX is an AI Automation &amp; Digital Solutions company in Port Harcourt, Nigeria: websites, AI assistants, WhatsApp automation and CRM systems that help businesses work smarter.">
+<meta name="theme-color" content="#13203C">
+<title>SolveX | AI Automation &amp; Digital Solutions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:wght@400;500&family=Poppins:wght@800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles/main.css">
+<style id="preloader-css">
+/* Opening screen: SOLVEX PORTFOLIO with loading at the bottom */
+#preloader{position:fixed;inset:0;z-index:1000;background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;font-family:"Poppins","DM Sans",system-ui,sans-serif;transition:opacity .8s ease,visibility .8s;animation:preOut .8s 14s forwards}
+#preloader.done{opacity:0;visibility:hidden;pointer-events:none}
+.pre-center{margin:auto;text-align:center;padding:0 16px}
+.pre-word{display:flex;justify-content:center;font-weight:800;font-size:clamp(3.2rem,16vw,11rem);line-height:1;letter-spacing:-.03em}
+.pre-word span{display:inline-block;opacity:0;transform:translateY(45%);animation:preUp .9s cubic-bezier(.2,.8,.2,1) forwards}
+.pre-word span:nth-child(1){animation-delay:.05s}.pre-word span:nth-child(2){animation-delay:.12s}.pre-word span:nth-child(3){animation-delay:.19s}
+.pre-word span:nth-child(4){animation-delay:.26s}.pre-word span:nth-child(5){animation-delay:.33s}.pre-word span:nth-child(6){animation-delay:.4s}
+.pre-sub{margin-top:.7rem;font-weight:300;font-size:clamp(.9rem,2.6vw,1.6rem);letter-spacing:.55em;text-transform:uppercase;color:#a78bfa;opacity:0;animation:preFade 1s .8s forwards}
+.pre-bottom{width:100%;padding:0 clamp(20px,6.95vw,120px) calc(28px + env(safe-area-inset-bottom,0px))}
+.pre-row{display:flex;justify-content:space-between;align-items:baseline;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:12px}
+.pre-pct{font-variant-numeric:tabular-nums;color:#fff;font-size:1rem;letter-spacing:.05em}
+.pre-bar{height:2px;background:rgba(255,255,255,.18);overflow:hidden}
+.pre-bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#a78bfa,#ffb547);transform:scaleX(0);transform-origin:0 50%}
+#pct{display:none!important}
+@keyframes preUp{to{opacity:1;transform:none}}
+@keyframes preFade{to{opacity:1}}
+@keyframes preOut{to{opacity:0;visibility:hidden;pointer-events:none}}
+@media (prefers-reduced-motion:reduce){.pre-word span,.pre-sub{animation-duration:.01s;animation-delay:0s}}
+</style>
+</head>
+<body class="loading" id="top">
+<div id="preloader" role="status" aria-live="polite">
+  <div class="pre-center">
+    <div class="pre-word" aria-label="SolveX"><span>S</span><span>O</span><span>L</span><span>V</span><span>E</span><span>X</span></div>
+    <div class="pre-sub">Portfolio</div>
+  </div>
+  <div class="pre-bottom">
+    <div class="pre-row"><span>Loading</span><span class="pre-pct" id="prePct">0%</span></div>
+    <div class="pre-bar"><i id="preBar"></i></div>
+  </div>
+</div>
+<canvas id="gl" aria-hidden="true"></canvas>
+<canvas id="scene" aria-label="Rotatable glass cube. Drag to rotate."></canvas>
+<div id="heroUI">
+  <p class="sr-only">SolveX: AI systems that never sleep</p>
+  <div class="g-arrows">
+    <button class="g-arrow" id="gPrev" aria-label="Rotate left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+    <button class="g-arrow" id="gNext" aria-label="Rotate right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </div>
+  <nav class="g-dots" aria-hidden="true"><button class="g-dot" tabindex="-1"></button><button class="g-dot active" tabindex="-1"></button><button class="g-dot" tabindex="-1"></button></nav>
+  <p class="g-tag">AI systems that<br>never <strong>sleep.</strong></p>
+  <div class="g-cta-row"><a href="#" id="gExplore" class="g-cta">Explore Now</a><span class="g-line"></span><span class="g-count" aria-hidden="true">24/7</span></div>
+</div>
+<div id="pct" aria-live="polite">0%</div>
+
+<header>
+  <a class="logo" href="#top">SolveX</a>
+  <a class="btn sm" data-wa href="#contact">Chat on WhatsApp</a>
+</header>
+
+<div id="glassSpacer" aria-hidden="true"></div>
+
+<main>
+<section data-s id="hero"><div class="col"><h1 id="h1">We build digital systems that move businesses forward.</h1><p class="lead hin">SolveX combines AI, automation, software, websites and digital strategy to help businesses work smarter, serve customers better and create room for sustainable growth.<br><br>Technology should not make your business more complicated. It should make your business easier to run.</p><div class="hin"><a class="btn" data-wa href="#contact">Start a Project</a><a class="btn ghost" href="#work">Explore Our Work</a></div></div></section>
+<section class="blk" id=about><div class="in"><h2>We are SolveX.</h2><p>SolveX is an AI Automation &amp; Digital Solutions company built to help businesses solve real problems with practical technology.</p><p>We design and build intelligent systems that simplify operations, improve customer experiences, generate opportunities and strengthen a company&#x27;s digital presence.</p><p>From high-performance websites and web applications to AI assistants, WhatsApp automation, CRM workflows, lead-generation systems, digital marketing and creative solutions, we bring technology and business thinking together.</p><p class="pull">We don&#x27;t build technology just because we can.<br>We build it because it should solve something.</p><h2 class="gap">Your business has enough to deal with.</h2><p>Too many businesses lose time and opportunities because important processes are still handled manually.</p><p class="pull">Customer enquiries go unanswered.<br>Leads get forgotten.<br>Appointments are missed.<br>Follow-ups happen too late.<br>Websites fail to convert.<br>Customers struggle to get information.<br>Teams spend hours doing repetitive work.</p><p>The problem isn&#x27;t always a lack of customers. Sometimes, the problem is the system behind the business.</p><p>That&#x27;s where SolveX comes in.</p></div></section>
+<section data-s id="services"><div class="col right"><h2>Solutions built around your business.</h2><p>We don't believe in one-size-fits-all digital solutions. We study the problem, understand the business and build the right system around it.</p><div class="list"><div><h3>AI automation</h3><p>Automate repetitive business processes, customer interactions and internal workflows with intelligent AI-powered systems.</p></div><div><h3>AI agents</h3><p>Deploy intelligent agents that communicate with customers, answer questions, qualify leads and guide users toward the right action.</p></div><div><h3>WhatsApp automation</h3><p>Turn WhatsApp into a smarter business channel for customer support, enquiries, lead capture, bookings and automated conversations.</p></div><div><h3>AI chatbots &amp; customer support</h3><p>Give customers fast, consistent answers while reducing the repetitive work your team handles manually.</p></div><div><h3>Websites &amp; web applications</h3><p>Build fast, modern and conversion-focused digital experiences designed around your business goals.</p></div><div><h3>CRM &amp; lead automation</h3><p>Capture, organize, qualify and follow up with leads systematically so opportunities don&#x27;t disappear.</p></div><div><h3>Lead generation</h3><p>Build systems and strategies designed to identify potential customers and create more opportunities for your business.</p></div><div><h3>Digital marketing &amp; SEO</h3><p>Improve your visibility, reach the right audience and create a stronger path from attention to action.</p></div><div><h3>Branding &amp; creative design</h3><p>Create professional visual identities and digital assets that help businesses communicate with confidence.</p></div><div><h3>Custom digital solutions</h3><p>When an off-the-shelf solution isn&#x27;t enough, we design and build around the problem.</p></div></div></div></section>
+<section class="blk"><div class="in"><h2>Don't just add technology. Build a better business.</h2><p>Technology is only valuable when it creates value. Our approach is simple:</p><ol class="steps"><li>Understand the problem.</li><li>Design the solution.</li><li>Build the system.</li><li>Make it useful.</li><li>Make it scalable.</li></ol><p>Every project should have a reason behind it.</p></div></section>
+<section data-s id="work"><div class="col"><h2>Selected work.</h2><p>Explore selected projects, internal products, demonstrations and concepts created by SolveX. Each one is labeled, so you always know what is a delivered project and what is a demonstration or an idea.</p><div class="cases"><div class="case"><span class="lbl">Completed project · Website development</span><h3>Intercloud</h3><p>A modern digital experience designed to strengthen Intercloud&#x27;s online presence and communicate its services through a clean, responsive and professional website.</p><p><b>Challenge:</b> Create a stronger digital presence and present the business clearly to online visitors.</p><p><b>Approach:</b> We focused on clear communication, modern presentation, responsive usability and a stronger digital experience.</p><p><b>Solution:</b> A professionally structured website designed around the business and its audience.</p><p>Good websites don&#x27;t just look good. They make it easier for people to understand what you do and take the next step.</p></div><div class="case"><span class="lbl">Internal product / demo</span><h3>Aria, the SolveX AI assistant</h3><p>Your business doesn&#x27;t sleep. Neither should your customer support.</p><p>Aria is SolveX&#x27;s AI-powered assistant, designed to help businesses handle customer conversations intelligently. It answers customer questions, handles repetitive enquiries, qualifies potential leads, guides customers toward the right service, supports appointment and consultation workflows and provides consistent responses around the clock.</p><p>Aria demonstrates what happens when customer communication becomes intelligent, structured and automated. Want an AI assistant built for your business?</p></div><div class="case"><span class="lbl">Demo</span><h3>WhatsApp automation</h3><p>WhatsApp is already where your customers are. The opportunity is to make it work harder for your business.</p><p>Automated customer responses, lead capture, lead qualification, frequently asked questions, appointment and booking workflows, customer routing, CRM integration and AI-powered conversations.</p><p>Instead of simply receiving messages, build a system that knows what to do with them.</p></div><div class="case"><span class="lbl">Concept / proposal · Website &amp; direct booking system</span><h3>J&#x27;s Signature Hotel</h3><p>A complete digital experience concept created around the needs of a modern hotel. This is a SolveX concept and proposal, not a completed client project.</p><p><b>The problem:</b> Hotels can lose opportunities when guests depend entirely on third-party booking channels or fragmented enquiry processes.</p><p><b>The concept:</b> Rebuild the hotel&#x27;s website into a direct digital booking experience where guests can explore rooms, view information, check availability, make reservations and communicate directly with the hotel.</p><p><b>Potential features:</b> Rooms &amp; suites · Room details · Availability · Direct booking · Guest information · Events and conference spaces · Restaurant and facilities · Gallery · WhatsApp communication · Booking management</p><p>The goal isn&#x27;t simply a better-looking hotel website. It&#x27;s a stronger digital booking channel.</p></div><div class="case"><span class="lbl">Demo / internal system</span><h3>Lead generation &amp; CRM system</h3><p>Leads are valuable only when businesses can organize, qualify and follow up with them effectively.</p><p>Discover. Qualify. Organize. Follow up. Convert.</p><p>SolveX explores systems that help businesses reduce manual lead management and create a more structured path from prospect to customer. More organization. Fewer missed opportunities.</p></div></div></div></section>
+<section class="blk" id=concepts><div class="in"><h2>What could we build for your business?</h2><p>We create digital experiences around the industry, audience and goals of each business. These are concepts, not client projects.</p><div class="grid"><div class="card"><h3>Hotels</h3><p>A direct-booking-focused experience designed to help guests discover rooms, facilities and booking options.</p></div><div class="card"><h3>Restaurants</h3><p>A digital experience designed to showcase the menu, location, reservations and customer experience.</p></div><div class="card"><h3>Real estate</h3><p>A property-focused platform designed to make listings easier to discover and enquiries easier to manage.</p></div><div class="card"><h3>Salons</h3><p>A booking-first experience designed to present services, show the work and make appointments easy to request.</p></div><div class="card"><h3>Clinics</h3><p>A clear and trustworthy digital front door designed to explain services, answer common questions and help patients request appointments.</p></div><div class="card"><h3>Schools</h3><p>A digital experience designed to present programmes, communicate with parents and simplify admission enquiries.</p></div><div class="card"><h3>E-commerce</h3><p>A storefront experience designed to present products clearly, make ordering simple and keep customers connected on WhatsApp.</p></div><div class="card"><h3>Professional services</h3><p>A credibility-focused website designed to explain expertise, set out services and turn enquiries into conversations.</p></div></div></div></section><section class="blk" id=process><div class="in"><h2>We don't start with the technology.</h2><p>We start with the problem.</p><p>Because the best solution isn&#x27;t necessarily the most complicated one.</p><p class="pull">Sometimes a business needs a website.<br>Sometimes it needs automation.<br>Sometimes it needs a better way to manage leads.<br>Sometimes it needs all three.</p><p>We figure out what actually makes sense before we build.</p><p class="pull">The goal isn&#x27;t more technology.<br>The goal is a better business.</p><h2 class="gap">From idea to implementation.</h2><div class="grid"><div class="card"><h3>01 Discover</h3><p>We understand your business, audience, goals and biggest challenges.</p></div><div class="card"><h3>02 Design</h3><p>We map the experience and design a solution around the real problem.</p></div><div class="card"><h3>03 Develop</h3><p>We turn the solution into a working digital product or system.</p></div><div class="card"><h3>04 Deploy</h3><p>We launch, test and refine the solution for real-world use.</p></div><div class="card"><h3>05 Grow</h3><p>We look for opportunities to improve, automate and scale what we&#x27;ve built.</p></div></div><h2 class="gap">Why SolveX?</h2><div class="grid"><div class="card"><h3>Business-first thinking</h3><p>We don&#x27;t build technology without understanding why the business needs it.</p></div><div class="card"><h3>Custom solutions</h3><p>Your business isn&#x27;t identical to everyone else&#x27;s. Your systems shouldn&#x27;t be either.</p></div><div class="card"><h3>AI + automation</h3><p>We use intelligent technology to reduce repetitive work and create smarter customer experiences.</p></div><div class="card"><h3>Modern digital experiences</h3><p>From websites to web applications, we build for today&#x27;s users.</p></div><div class="card"><h3>Built for growth</h3><p>We think beyond launch and consider how the solution can support the business as it grows.</p></div><div class="card"><h3>Human + technology</h3><p>Automation handles repetitive work. People handle what requires judgment, trust and relationships.</p></div><div class="card"><h3>Attention to detail</h3><p>Small details shape how customers perceive a business. We take them seriously.</p></div></div></div></section><section class="blk" id=team><div class="in"><h2>Built for businesses ready to move.</h2><p>We work with businesses, startups, entrepreneurs and organizations looking to improve how they operate, communicate and grow.</p><p class="chips"><span>Hospitality</span><span>Restaurants</span><span>Real Estate</span><span>Healthcare</span><span>Education</span><span>Professional Services</span><span>Retail &amp; E-commerce</span><span>Personal Brands</span><span>Startups</span><span>Growing SMEs</span></p><p>Whatever the industry, the question is the same: What could your business do better with the right digital system behind it?</p><h2 class="gap">The people behind SolveX.</h2><p>Different strengths. One direction.</p><p>We bring together leadership, operations, technology, marketing and creative thinking to build solutions that create real business value.</p><div class="grid"><div class="card"><h3>Divine Godwin, Chief Executive Officer</h3><p>Divine leads SolveX&#x27;s vision, strategy and overall direction. He focuses on business development, strategic partnerships and the decisions that move the company forward.</p></div><div class="card"><h3>Gospel Gomba, Chief Operating Officer</h3><p>Gospel oversees SolveX&#x27;s operations, systems and execution. He focuses on building efficient workflows, coordinating delivery and turning ideas into properly executed solutions.</p></div><div class="card"><h3>Success Godwin, Chief Marketing Officer</h3><p>Success leads SolveX&#x27;s marketing, brand growth and customer acquisition efforts. He focuses on campaigns, content, lead generation and identifying opportunities for growth.</p></div></div></div></section><section class="blk" id=faq><div class="in"><h2>We care about the result.</h2><p class="pull">A website should have a purpose.<br>An AI assistant should solve a problem.<br>Automation should save time.<br>A CRM should create clarity.<br>Marketing should create opportunities.<br>Technology should make business better.</p><p>That&#x27;s the standard we build toward.</p><h2 class="gap">Questions?</h2><details><summary>Do you only build websites?</summary><p>No. Websites are one part of what we do. SolveX also builds AI automation, AI agents, WhatsApp automation, CRM and lead-generation systems, digital marketing solutions, branding and custom digital products.</p></details><details><summary>Can you build something custom for my business?</summary><p>Yes. We design and build solutions around your specific requirements rather than forcing your business into a generic system.</p></details><details><summary>Do you work with small businesses?</summary><p>Yes. We work with businesses at different stages and focus on solutions that make sense for the business, its goals and its current needs.</p></details><details><summary>How do I get started?</summary><p>Tell us what you&#x27;re trying to achieve, what isn&#x27;t working and what you&#x27;d like to improve. We&#x27;ll discuss the problem, identify the right solution and agree the next step.</p></details><details><summary>Can SolveX automate my existing process?</summary><p>In many cases, yes. We can assess your current workflow and identify repetitive tasks, communication processes, lead management or customer-service activities that can be improved with automation.</p></details></div></section><section class="pkgs" id="packages">
+    <div class="pk-wrap">
+      <h2>Pick how far you want to go.</h2>
+      <div class="pk-grid">
+        <div class="pk-card"><h3>Starter</h3><p class="pk-price">₦50,000 <small>per month</small></p><ul><li>Basic AI chatbot setup</li><li>Social media management 3 times a week</li><li>5 graphic designs monthly</li><li>Basic SEO optimization</li></ul></div>
+        <div class="pk-card pk-pop"><span class="pk-tag">Most popular</span><h3>Pro</h3><p class="pk-price">₦150,000 <small>per month</small></p><ul><li>Advanced AI automation workflows</li><li>Daily social media management</li><li>15 graphic designs monthly</li><li>Full SEO and content strategy</li><li>Landing page design</li></ul></div>
+        <div class="pk-card"><h3>Enterprise</h3><p class="pk-price">₦300,000 <small>per month</small></p><ul><li>Custom AI agent development</li><li>Unlimited social media management</li><li>Full branding and website</li><li>Dedicated account manager</li><li>24/7 priority support</li></ul></div>
+      </div>
+      <p class="pk-links"><a href="https://laybel-collections.vercel.app" target="_blank" rel="noopener">Laybel Collections</a><a href="https://intercloud.vercel.app" target="_blank" rel="noopener">Intercloud PTL</a><a href="mailto:solvex223@gmail.com">solvex223@gmail.com</a><a href="https://www.instagram.com/solvex.ng" target="_blank" rel="noopener">Instagram</a><a href="https://x.com/Solvexagency" target="_blank" rel="noopener">X</a></p>
+    </div>
+  </section>
+<section data-s id="contact"><div class="col mid"><h2>What are you waiting to build?</h2><p style="margin-left:auto;margin-right:auto">Your next customer is already online. Your next opportunity is already somewhere in your workflow. Your next stage of growth may simply need a better system behind it. Let's build it.</p><a class="btn" data-wa href="#contact">Start a Project</a><a class="btn ghost" data-wa href="#contact">Talk to SolveX</a></div></section>
+<section class="blk" id=final><div class="in"><h2>Why wouldn't you trust SolveX with your next digital project?</h2><p>You&#x27;ve seen what we can build. Now let&#x27;s talk about what your business needs.</p><p>Tell us the problem. We&#x27;ll figure out the system.</p><a class="btn" data-wa href="#contact">Let's build something that matters.</a><a class="btn ghost" data-wa href="#contact">Contact SolveX</a><h2 class="gap">Let's build.</h2><p class="pull">Have a website that needs rebuilding?<br>A process that needs automating?<br>Leads that need better management?<br>Customers who need faster answers?<br>An idea that needs to become a real product?</p><p>Let&#x27;s talk.</p><p class="contact"><b>SolveX, AI Automation & Digital Solutions</b><br>Port Harcourt, Rivers State, Nigeria<br>09138935346<br>hello@solvex.com.ng<br>solvex.com.ng<br>Instagram: @solvexng</p><p class="pull">Innovate. Automate. Elevate.</p></div></section>
+</main>
+
+<footer>SolveX, AI Automation &amp; Digital Solutions. Today, We Build. Tomorrow, We Lead. &copy; 2026 SolveX. All rights reserved.</footer>
+
+<script>
+/* Opening screen logic: waits for the app and the glass hero, then fades out and starts the reveal. */
+(function(){
+  var pre=document.getElementById('preloader');if(!pre)return;
+  var bar=document.getElementById('preBar'),num=document.getElementById('prePct'),appPct=document.getElementById('pct');
+  var root=document.documentElement,shown=0,finished=false,t0=Date.now();
+  function appProgress(){var v=appPct?parseInt(appPct.textContent,10):0;return isNaN(v)?0:v}
+  function glassOk(){return root.classList.contains('glass-ready')||root.classList.contains('nogl')}
+  function appDone(){return !document.body.classList.contains('loading')}
+  function finish(){
+    finished=true;
+    setTimeout(function(){
+      pre.classList.add('done');
+      window.dispatchEvent(new CustomEvent('solvex:reveal'));
+      setTimeout(function(){pre.remove()},1000);
+    },350);
+  }
+  function tick(){
+    if(finished)return;
+    var target=Math.min(appProgress(),95);
+    if(appDone()&&glassOk())target=100;
+    if((Date.now()-t0)>12000)target=100; /* never stay stuck */
+    shown+=(target-shown)*0.12;
+    if(target-shown<0.4)shown=target;
+    num.textContent=Math.round(shown)+'%';
+    bar.style.transform='scaleX('+(shown/100)+')';
+    if(shown>=100){finish();return}
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
+<script>
+/* Failsafes: the page is hidden while "loading", so it must never wait forever. */
+if(location.protocol==='file:'){
+  document.body.classList.remove('loading');
+  var m=document.createElement('div');
+  m.style.cssText='position:relative;z-index:9;max-width:34rem;margin:0 auto;padding:120px 24px;font:16px/1.6 system-ui,sans-serif;color:#13203C';
+  m.innerHTML='<b>This site has to be served, not opened as a file.</b><br>In the project folder run <code>npm install</code> then <code>npm run dev</code>, and open <code>http://localhost:3000</code>.';
+  document.body.appendChild(m);
+}
+setTimeout(function(){if(!window.solvexApp)document.body.classList.remove('loading')},14000);
+</script>
+<script type="module" src="/src/main.js"></script>
+<script>
+/* Fly-in on scroll for the content blocks */
+(function(){
+  if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  var els=document.querySelectorAll('.blk .in > *:not(.grid):not(.steps):not(.chips), .blk .grid > *, .blk .steps li, .blk .chips span');
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('fly-on');io.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+  els.forEach(function(el,i){el.classList.add('fly');el.style.setProperty('--d',(i%4)*90+'ms');el.style.setProperty('--x',i%2?'70px':'-70px');io.observe(el)});
+})();
+</script>
+</body>
+</html>

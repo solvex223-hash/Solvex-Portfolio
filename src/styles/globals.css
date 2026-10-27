@@ -1,0 +1,164 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #060520; /* deep indigo, matched to the globe */
+  --bg-rgb: 6, 5, 32;
+  --fg: #f4f4f2;
+  --fg-soft: rgba(244, 244, 242, 0.82);
+  --muted: rgba(244, 244, 242, 0.5);
+  --line: rgba(244, 244, 242, 0.14);
+  --accent: #8b6cff; /* restrained violet, used sparingly */
+
+  --font-display: 'Sora', sans-serif;
+  --font-body: 'Manrope', sans-serif;
+  --font-label: 'Space Grotesk', sans-serif;
+
+  --pad: clamp(1.25rem, 4vw, 4rem);
+  --h-size: clamp(2rem, min(4.6vw, 8.4vh), 5.8rem); /* one scale for every major section heading */
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* the page background: deep navy with violet, magenta and blue light, like the globe */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 55% at 10% 10%, rgba(120, 50, 220, 0.4), transparent 70%),
+    radial-gradient(45% 45% at 3% 62%, rgba(190, 50, 200, 0.2), transparent 70%),
+    radial-gradient(55% 60% at 84% 52%, rgba(30, 80, 230, 0.24), transparent 70%),
+    radial-gradient(75% 60% at 50% 125%, rgba(60, 30, 170, 0.38), transparent 70%),
+    linear-gradient(180deg, #080625 0%, #060520 55%, #050419 100%);
+}
+
+body {
+  font-family: var(--font-body);
+  overflow-x: clip; /* clip (not hidden) so position: sticky keeps working */
+  -webkit-font-smoothing: antialiased;
+}
+
+html.is-loading,
+html.is-loading body {
+  overflow: hidden;
+}
+
+/* fixed 3D world that lives behind every section */
+.scene-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ---------- typography primitives ---------- */
+.label {
+  margin: 0;
+  font-family: var(--font-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-size: clamp(0.65rem, 0.9vw, 0.82rem);
+  color: var(--muted);
+}
+
+.h-section {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--h-size);
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.line {
+  display: block;
+  overflow: hidden;
+  padding: 0.05em 0 0.04em;
+}
+
+.line-inner {
+  display: block;
+  will-change: transform;
+}
+
+.copy {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: clamp(0.92rem, min(0.7vw + 0.45rem, 2.1vh), 1.15rem);
+  line-height: 1.62;
+  color: var(--fg-soft);
+}
+
+.copy--lead {
+  font-size: clamp(1rem, min(0.9vw + 0.5rem, 2.4vh), 1.3rem);
+}
+
+.copy--strong {
+  font-weight: 500;
+  color: var(--fg);
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.95rem 1.65rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1;
+  text-decoration: none;
+  transition: transform 0.35s ease, background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+}
+
+.btn--primary {
+  background: var(--fg);
+  color: #050505;
+}
+
+.btn--primary:hover {
+  transform: translateY(-2px);
+}
+
+.btn--ghost {
+  border-color: rgba(244, 244, 242, 0.55);
+  color: var(--fg);
+}
+
+.btn--ghost:hover {
+  background: rgba(244, 244, 242, 0.1);
+  border-color: var(--fg);
+}
+
+/* ---------- reveal start state (GSAP animates to visible) ---------- */
+[data-reveal] {
+  opacity: 0;
+}
+
+[data-lines] .line-inner {
+  transform: translateY(110%);
+}
+
+@media (max-aspect-ratio: 1/1) {
+  :root {
+    --h-size: clamp(1.7rem, min(9vw, 6.6vh), 3.4rem);
+  }
+}

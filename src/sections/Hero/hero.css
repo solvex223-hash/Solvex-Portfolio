@@ -1,0 +1,109 @@
+.hero {
+  /* ONE type scale for the whole headline. Every line uses this single value. */
+  --hero-size: clamp(2.1rem, min(4.6vw, 8.4vh), 6.4rem);
+
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: clamp(5rem, 9vh, 7rem) var(--pad) clamp(2.5rem, 6vh, 4rem);
+  visibility: hidden; /* revealed by revealHero() */
+}
+
+/* keeps the left-hand typography readable over the 3D */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(var(--bg-rgb), 0.7) 0%, rgba(var(--bg-rgb), 0.35) 40%, transparent 62%);
+}
+
+.hero__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  max-width: min(52vw, 60rem);
+}
+
+.hero__eyebrow {
+  position: absolute;
+  top: clamp(1.25rem, 4vh, 2.5rem);
+  left: var(--pad);
+}
+
+.hero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--hero-size);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--fg);
+}
+
+.hero__line {
+  display: block;
+  overflow: hidden;
+  padding: 0.03em 0;
+}
+
+.hero__line-inner {
+  display: block;
+  will-change: transform;
+}
+
+.hero__intro {
+  max-width: 34rem;
+  margin: clamp(1.1rem, 3vh, 2rem) 0 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: clamp(0.92rem, min(0.55vw + 0.5rem, 2.1vh), 1.12rem);
+  line-height: 1.6;
+  color: var(--fg-soft);
+}
+
+.hero__statement {
+  max-width: 34rem;
+  margin: clamp(0.8rem, 2vh, 1.4rem) 0 0;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: clamp(0.92rem, min(0.55vw + 0.5rem, 2.1vh), 1.12rem);
+  line-height: 1.55;
+  color: var(--fg);
+}
+
+.hero__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: clamp(1.3rem, 3.4vh, 2.2rem);
+}
+
+/* phones and tablets held upright: the globe sits on top, the text starts underneath it */
+@media (max-aspect-ratio: 1/1) {
+  .hero {
+    --hero-size: min(8.4vw, 6vh);
+    align-items: flex-start;
+    padding-top: 47vh;
+    padding-top: 47svh;
+    padding-bottom: 2.5rem;
+  }
+  .hero::before {
+    background: linear-gradient(0deg, rgba(var(--bg-rgb), 0.9) 0%, rgba(var(--bg-rgb), 0.5) 45%, transparent 70%);
+  }
+  .hero__inner {
+    max-width: 100%;
+  }
+  .hero__intro,
+  .hero__statement {
+    max-width: none;
+  }
+}

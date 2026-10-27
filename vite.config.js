@@ -7,18 +7,12 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    },
+    minify: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          three: ['three'],
-          gsap: ['gsap']
+        manualChunks: (id) => {
+          if (id.includes('three')) return 'three';
+          if (id.includes('gsap')) return 'gsap';
         }
       }
     }

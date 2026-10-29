@@ -43,7 +43,7 @@ export const projects: Project[] = [
     layout: 'editorial-right',
     visual: {
       kind: 'browser',
-      screenshots: ['/images/intercloud/home.webp', '/images/intercloud/home.jpg', '/images/intercloud/home.png'],
+      screenshots: ['/images/intercloud/Screenshot (723).png'],
       live: { url: 'https://intercloud.vercel.app/', width: 1440, height: 4800 },
     },
   },

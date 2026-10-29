@@ -68,9 +68,10 @@ export function createSolutionsScroll(section: HTMLElement, reduced = false) {
         vis(el, op > 0.01);
       });
 
-      // continuous scroll position: it evolves and pans the particle field (no stepped formations)
       const k = Math.min(Math.floor(s), n - 1);
-      const service = s; // continuous: scrolling evolves and pans the field
+      // object index: each service holds its object, then the particles morph into the next one as its
+      // text leaves; after the last service they morph into the connected system and settle
+      const service = k < n - 1 ? k + range(s - k, 0.62, 1.0) : n - 1 + range(p, 0.9, 0.97);
 
       // progress rail
       const idx = p > SERVICES_START && p < 0.95 ? k : -1;

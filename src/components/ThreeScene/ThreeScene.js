@@ -5,6 +5,8 @@ import { Globe } from '../../three/Globe/Globe.js';
 import { GlobeTags } from '../../three/Globe/GlobeTags.js';
 import { SystemParticles } from '../../three/Particles/SystemParticles.js';
 import { TeamPhoto } from '../../three/Hologram/TeamPhoto.js';
+import { ShapeBank } from '../../three/Shapes/ShapeBank.js';
+import { ServicePhotos } from '../../three/Shapes/ServicePhotos.js';
 import { loadTeamPhoto } from '../../three/Hologram/sampleImage.js';
 import { CameraRig, ABOUT_DISTANCE } from '../../three/Camera/CameraRig.js';
 import { getQuality } from '../../three/quality.js';
@@ -73,6 +75,9 @@ export async function createThreeScene(mount, { reduced = false } = {}) {
     holo = fallbackHologram(count);
   }
 
+  const shapes = new ShapeBank(count);
+  shapes.start().catch((err) => console.warn('[shapes]', err)); // photos -> particle targets, one per idle slice
+
   const particles = new SystemParticles(count, {
     tower: head.points,
     holo: holo.positions,
@@ -81,11 +86,14 @@ export async function createThreeScene(mount, { reduced = false } = {}) {
     headColors: head.colors,
     headTones: head.tones,
     shared: head.shared,
+    shapes,
   });
   const photo = holo.photo ? new TeamPhoto(holo.photo, holo.aspect) : null;
 
   scene.add(head.group, particles.points);
   if (photo) scene.add(photo.mesh);
+  const svcPhotos = new ServicePhotos(shapes); // the real service photos that cover the formed particles
+  scene.add(svcPhotos.group);
 
   // ---------- sizing ----------
   let holoScale = 6;
@@ -156,6 +164,7 @@ export async function createThreeScene(mount, { reduced = false } = {}) {
     const photoOn = range(cur.form, 0.78, 1.0) * (1 - range(cur.dissolve, 0, 0.35));
     particles.update(state.time, cur, head.towerRot, photoOn, head.tilt);
     photo?.update(photoOn, holoScale);
+    particles.setServicePhoto(svcPhotos.update(cur.service, range(cur.connect, 0.85, 1.0), state.time));
 
     rig.update(cur, dt, state.intro);
 
@@ -253,6 +262,8 @@ export async function createThreeScene(mount, { reduced = false } = {}) {
       document.removeEventListener('visibilitychange', onVisibility);
       gsap.killTweensOf(state);
       head.dispose();
+      shapes.dispose();
+      svcPhotos.dispose();
       tags.dispose();
       photo?.texture.dispose();
       disposeTree(scene);

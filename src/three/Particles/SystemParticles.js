@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { seeded } from '../math.js';
-import { FIELD_GLSL } from '../Field/field.glsl.js';
+import { SHAPE_COUNT, TEX_W } from '../Shapes/ShapeBank.js';
 import { createPaletteUniforms, applyPalette } from '../Field/palette.js';
 
 const VERT = /* glsl */ `
@@ -13,7 +13,7 @@ const VERT = /* glsl */ `
   attribute float aTone;
   attribute float aHeadTone;
   attribute float aSize;
-  attribute vec4 aRnd;
+  attribute float aIdx;
 
   uniform float uTime;
   uniform float uScale;
@@ -30,13 +30,32 @@ const VERT = /* glsl */ `
   uniform vec2 uMouse;
   uniform vec3 uHoloCenter;
   uniform float uConnect;
-  uniform float uService;
+  uniform float uService; // continuous shape index 0..10
+  uniform sampler2D uShapes;
+  uniform sampler2D uShapeCols;
+  uniform float uSvcPhoto; // 0..1: how strongly the real service photo covers the particles
+  uniform float uShapeRows;
   uniform vec3 uBase;
   uniform vec3 uHigh;
   uniform vec3 uAccent;
   uniform vec3 uAtmos;
 
-  ${FIELD_GLSL}
+  const float SH_W = ${TEX_W}.0;
+  const float SH_LAST = ${SHAPE_COUNT - 1}.0;
+
+  // target position / brightness of this particle in shape s (see ShapeBank)
+  vec4 shapeAt(float s, float idx) {
+    float row = floor(idx / SH_W);
+    float col = idx - row * SH_W;
+    return texelFetch(uShapes, ivec2(int(col), int(s * uShapeRows + row)), 0);
+  }
+
+  // real colour of this particle in shape s (rgb in sRGB, a = 1 when the shape comes from a photo)
+  vec4 shapeCol(float s, float idx) {
+    float row = floor(idx / SH_W);
+    float col = idx - row * SH_W;
+    return texelFetch(uShapeCols, ivec2(int(col), int(s * uShapeRows + row)), 0);
+  }
 
   varying float vAlpha;
   varying float vForm;
@@ -90,14 +109,46 @@ const VERT = /* glsl */ `
     // 4. fragmentation after the hologram
     p += (aDir * (4.0 + aSeed * 14.0) + swirl * 0.9) * d;
 
-    // 5. the fragments settle into the volumetric field (staggered per particle)
+    // 5. the fragments assemble into 3D objects, then morph from shape to shape.
+    //    Every particle has a target position on every object (ShapeBank texture).
     float xc = 0.0;
-    float xLayer = 1.0;
-    float xD = 30.0;
+    float xTone = 0.5;
+    float xAcc = 0.0;
+    float xDust = 0.0;
+    vec3 xCol = vec3(0.0);
+    float xHas = 0.0;
     if (uConnect > 0.001) {
       xc = clamp(uConnect * 1.5 - aSeed * 0.5, 0.0, 1.0);
       xc = xc * xc * (3.0 - 2.0 * xc);
-      vec3 fpos = fieldHome(aRnd, uTime, uService, uAspect, uSettle, xLayer, xD);
+
+      float xi = min(floor(uService), SH_LAST - 1.0);
+      float xf = uService - xi;
+      float xm = clamp(xf * 1.5 - aSeed * 0.5, 0.0, 1.0); // staggered per particle
+      xm = xm * xm * (3.0 - 2.0 * xm);
+
+      vec4 sa = shapeAt(xi, aIdx);
+      vec4 sb = shapeAt(xi + 1.0, aIdx);
+      vec3 fpos = mix(sa.xyz, sb.xyz, xm);
+
+      // between objects the particles lift off, drift and re-converge (dissolve and reform)
+      float arc = sin(3.14159 * xm);
+      xDust = step(sa.w, 0.0);
+      fpos += (aDir * (1.4 + 2.6 * aSeed) + swirl * 0.7) * arc * (1.0 - xDust);
+      // formed objects stay crisp: tiny breathing only. Ambient dust drifts freely.
+      fpos += swirl * mix(0.02, 0.7, xDust);
+
+      // slow, controlled sway so the volume is readable as 3D
+      float yaw = sin(uTime * 0.14) * 0.2;
+      fpos.xz = vec2(cos(yaw) * fpos.x + sin(yaw) * fpos.z, -sin(yaw) * fpos.x + cos(yaw) * fpos.z);
+
+      float accA = step(2.0, sa.w);
+      float accB = step(2.0, sb.w);
+      xTone = mix(sa.w - 2.0 * accA, sb.w - 2.0 * accB, xm);
+      xAcc = mix(accA, accB, xm);
+      vec4 ca = shapeCol(xi, aIdx);
+      vec4 cb = shapeCol(xi + 1.0, aIdx);
+      xCol = mix(ca.rgb, cb.rgb, xm);
+      xHas = mix(ca.a, cb.a, xm) * (1.0 - xDust);
       p = mix(p, fpos, xc);
     }
 
@@ -112,16 +163,11 @@ const VERT = /* glsl */ `
     float holoOn = f * (1.0 - d);
     float size = aSize * (1.0 + 0.7 * aTone * holoOn) * (1.0 + 1.4 * h);
 
-    // field shading: size, brightness and colour by depth layer
+    // object shading: bright silhouette edges, softer faces, a few violet accents
     float fH = fract(aSeed * 91.7);
-    float fSize = xLayer < 0.5 ? 0.026 + 0.030 * fH * fH
-                : (xLayer < 1.5 ? 0.030 + 0.050 * fH * fH : 0.060 + 0.060 * fH);
-    // text-safe region: fewer, dimmer, smaller particles behind the centred write-up
-    vec2 safeR = uAspect >= 1.0 ? vec2(0.62, 0.42) : vec2(0.96, 0.36);
-    float safe = smoothstep(0.55, 1.1, length(ndc / safeR));
-    float dimA = mix(1.0, mix(0.16, 1.0, safe), xc);
-    size = mix(size, fSize * mix(0.65, 1.0, safe), xc);
-    gl_PointSize = clamp(size * uScale / -mv.z, 1.0, mix(8.0, 12.0, xc));
+    float fSize = mix(0.030 + 0.024 * xTone, 0.016 + 0.034 * fH * fH, xDust) * (1.0 + 0.25 * xAcc + 0.45 * xHas);
+    size = mix(size, fSize, xc);
+    gl_PointSize = clamp(size * uScale / -mv.z, 1.0, mix(8.0, 9.0, xc));
 
     float twinkle = 0.75 + 0.25 * sin(uTime * 1.3 + aSeed * 40.0);
     float aT = mix((0.26 + 0.62 * aHeadTone) * twinkle * (0.65 + 0.9 * rimG) * front, 0.85, s) + 0.9 * h;
@@ -129,19 +175,20 @@ const VERT = /* glsl */ `
     // once the real photograph fades in, the particles step back
     float photoCover = 1.0 - 0.92 * uPhoto * f;
     vAlpha = mix(aT, aH, f) * mix(1.0, 0.5, d) * photoCover * uVis;
-    float tw = 0.88 + 0.12 * sin(uTime * (0.4 + fH * 0.8) + aSeed * 60.0);
-    float baseA = xLayer < 0.5 ? 0.30 + 0.35 * aTone
-                : (xLayer < 1.5 ? 0.45 + 0.45 * aTone : 0.75 + 0.25 * fH);
-    float fog = mix(1.0, 0.4, smoothstep(14.0, 50.0, xD));
-    float nearFade = smoothstep(5.5, 9.0, xD); // very near particles dissolve instead of popping at the lens
-    vAlpha = mix(vAlpha, baseA * tw * fog * nearFade * dimA, xc);
+    float tw = 0.92 + 0.08 * sin(uTime * (0.4 + fH * 0.8) + aSeed * 60.0);
+    // ambient dust stays faint and keeps clear of the write-up (left on wide screens, bottom when stacked)
+    float dustKeep = uAspect >= 1.0 ? smoothstep(-0.55, 0.0, ndc.x) : smoothstep(-0.55, 0.05, ndc.y);
+    float objA = mix((0.36 + 0.64 * xTone) * tw, (0.55 + 0.45 * xTone) * tw, xHas);
+    float dustA = (0.1 + 0.18 * fH) * mix(0.3, 1.0, dustKeep);
+    vAlpha = mix(vAlpha, mix(objA, dustA, xDust), xc);
+    vAlpha *= 1.0 - 0.7 * uSvcPhoto * xHas * xc; // once the photo has taken over, the particles recede to a fine grain
     vXc = xc;
 
-    // colour: neutral silver by default, the accent only touches a few mid / focal particles
-    float acc = xLayer < 0.5 ? 0.0 : step(xLayer < 1.5 ? 0.94 : 0.75, fract(aSeed * 37.1));
-    vec3 fcol = mix(uBase, uHigh, smoothstep(0.55, 1.0, aTone) * (xLayer > 0.5 ? 1.0 : 0.35));
-    fcol = mix(fcol, uAtmos, 0.45 * smoothstep(22.0, 50.0, xD)); // distant haze
-    vFC = mix(fcol, uAccent, acc * 0.85);
+    // colour: silver and soft white; the accent only touches selected parts of each object
+    vec3 fcol = mix(uBase, uHigh, xTone * xTone);
+    fcol = mix(fcol, pow(xCol, vec3(2.2)), xHas); // photo shapes keep their real colours
+    fcol = mix(fcol, uAtmos, 0.5 * xDust);
+    vFC = mix(fcol, uAccent, xAcc * 0.9 * (1.0 - xDust) * (1.0 - xHas));
     vGlow = h;
     vTint = tint * (1.0 - s);
     vRim = rimG * (1.0 - s);
@@ -181,7 +228,7 @@ const FRAG = /* glsl */ `
 `;
 
 export class SystemParticles {
-  constructor(count, { tower, holo, tones, colors, headColors, headTones, shared }) {
+  constructor(count, { tower, holo, tones, colors, headColors, headTones, shared, shapes }) {
     const R = seeded(5);
     const dir = new Float32Array(count * 3);
     const seed = new Float32Array(count);
@@ -207,13 +254,10 @@ export class SystemParticles {
     geo.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1));
     geo.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
 
-    // separate generator so the existing particle layout stays exactly as it was
-    const RR = seeded(77);
-    const rnd = new Float32Array(count * 4);
-    for (let i = 0; i < count * 4; i++) rnd[i] = RR();
-    geo.setAttribute('aRnd', new THREE.BufferAttribute(rnd, 4));
-
-    this.settle = { value: 0 }; // shared with the connection lines
+    // index into the ShapeBank texture (target positions of this particle on every object)
+    const idx = new Float32Array(count);
+    for (let i = 0; i < count; i++) idx[i] = i;
+    geo.setAttribute('aIdx', new THREE.BufferAttribute(idx, 1));
 
     this.material = new THREE.ShaderMaterial({
       vertexShader: VERT,
@@ -238,13 +282,20 @@ export class SystemParticles {
         uHoloCenter: { value: new THREE.Vector3(0, 0, 0) },
         uConnect: { value: 0 },
         uService: { value: 0 },
-        uSettle: this.settle,
+        uShapes: { value: shapes.texture },
+        uShapeCols: { value: shapes.colorTexture },
+        uSvcPhoto: { value: 0 },
+        uShapeRows: { value: shapes.rows },
         ...createPaletteUniforms(),
       },
     });
 
     this.points = new THREE.Points(geo, this.material);
     this.points.frustumCulled = false; // positions are computed in the shader
+  }
+
+  setServicePhoto(v) {
+    this.material.uniforms.uSvcPhoto.value = v;
   }
 
   setPalette(p) {
@@ -270,6 +321,5 @@ export class SystemParticles {
     u.uTilt.value = tilt;
     u.uConnect.value = d.connect ?? 0;
     u.uService.value = d.service ?? 0;
-    this.settle.value = d.settle ?? 0;
   }
 }

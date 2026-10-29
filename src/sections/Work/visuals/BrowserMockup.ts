@@ -168,16 +168,57 @@ export function createBrowserMockup(name: string, screenshots: string[], live?: 
   const page = el.querySelector<HTMLElement>('.browser__page')!;
   const viewport = el.querySelector<HTMLElement>('.browser__viewport')!;
 
-  void loadFirst(screenshots).then((url) => {
-    if (!url) return; // keep the representative layout
+  // If we have a screenshot, load it IMMEDIATELY (not async) so wireframe never shows
+  if (screenshots.length > 0) {
+    const url = screenshots[0];
     const img = new Image();
     img.src = url;
     img.alt = `${name} website`;
     img.decoding = 'async';
-    page.replaceChildren(img);
-    el.classList.remove('is-representative'); // real screenshot: hide the tag
-    el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
-  });
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.style.objectPosition = 'center top';
+    img.onload = () => {
+      page.replaceChildren(img);
+      el.classList.remove('is-representative');
+      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
+    };
+    img.onerror = () => {
+      // fallback to wireframe if image fails
+      void loadFirst(screenshots.slice(1)).then((fallbackUrl) => {
+        if (fallbackUrl) {
+          const fbImg = new Image();
+          fbImg.src = fallbackUrl;
+          fbImg.alt = `${name} website`;
+          fbImg.decoding = 'async';
+          fbImg.style.width = '100%';
+          fbImg.style.height = '100%';
+          fbImg.style.objectFit = 'cover';
+          fbImg.style.objectPosition = 'center top';
+          page.replaceChildren(fbImg);
+          el.classList.remove('is-representative');
+          el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
+        }
+      });
+    };
+  } else {
+    // No screenshots: try loadFirst for any fallback
+    void loadFirst(screenshots).then((url) => {
+      if (!url) return;
+      const img = new Image();
+      img.src = url;
+      img.alt = `${name} website`;
+      img.decoding = 'async';
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      img.style.objectPosition = 'center top';
+      page.replaceChildren(img);
+      el.classList.remove('is-representative');
+      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
+    });
+  }
 
   if (live) mountLive(el, page, viewport, name, live);
 

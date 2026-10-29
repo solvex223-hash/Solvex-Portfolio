@@ -74,9 +74,15 @@ function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, na
     frame.height = String(live.height);
     frame.tabIndex = -1;
     frame.setAttribute('aria-hidden', 'true');
-    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    // allow-scripts + allow-same-origin: needed for cross-origin iframe to render content
+    // allow-top-navigation: lets site redirect if needed
+    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-top-navigation');
     frame.referrerPolicy = 'no-referrer';
     holder.appendChild(frame);
+
+    // Debug: log iframe loading state
+    frame.addEventListener('load', () => console.log(`[BrowserMockup] iframe load event fired for ${name}`));
+    frame.addEventListener('error', (e) => console.error(`[BrowserMockup] iframe error for ${name}:`, e));
 
     const fit = () => {
       const s = viewport.clientWidth / live.width;
@@ -105,7 +111,7 @@ function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, na
       el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
     };
     frame.addEventListener('load', reveal);
-    window.setTimeout(reveal, 3500);
+    window.setTimeout(reveal, 8000);
 
     page.style.position = 'relative';
     holder.classList.add('is-loading'); // invisible until revealed, so nothing half-drawn is shown

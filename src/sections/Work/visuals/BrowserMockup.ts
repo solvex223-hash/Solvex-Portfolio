@@ -54,11 +54,14 @@ export interface LiveOptions {
 /**
  * Shows the real website, scaled down to the window width, inside `page` (so the existing scroll logic slides it
  * like it does a screenshot). The iframe is created only when the card is about to be seen, ignores the pointer
- * (page scrolling is never captured) and is skipped on phones / data-saver. If it cannot load, nothing changes.
+ * (page scrolling is never captured). On phones/data-saver it falls back to screenshot/wireframe.
+ * If the iframe cannot load (CSP, network error, blank), it gracefully falls back.
  */
 function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, name: string, live: LiveOptions) {
   const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
-  if (window.matchMedia('(max-width: 720px)').matches || nav.connection?.saveData) return;
+  const isMobile = window.matchMedia('(max-width: 720px)').matches;
+  const isDataSaver = nav.connection?.saveData;
+  if (isMobile || isDataSaver) return; // skip live preview, keep wireframe/screenshot
 
   let started = false;
   const start = () => {
@@ -80,10 +83,6 @@ function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, na
     frame.referrerPolicy = 'no-referrer';
     holder.appendChild(frame);
 
-    // Debug: log iframe loading state
-    frame.addEventListener('load', () => console.log(`[BrowserMockup] iframe load event fired for ${name}`));
-    frame.addEventListener('error', (e) => console.error(`[BrowserMockup] iframe error for ${name}:`, e));
-
     const fit = () => {
       const s = viewport.clientWidth / live.width;
       frame.style.transform = `scale(${s})`;
@@ -92,15 +91,26 @@ function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, na
     };
     const ro = new ResizeObserver(() => {
       fit();
-      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true })); // re-measure the scroll distance
+      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
     });
 
-    // 'load' only fires after every photo and video of the site has downloaded, which can take a long time on a
-    // heavy page. So the preview is shown on 'load' OR after a short delay, whichever comes first, and is never
-    // thrown away for being slow.
     let revealed = false;
-    const reveal = () => {
+    let hasContent = false;
+
+    const tryReveal = () => {
       if (revealed) return;
+      // Only reveal if iframe actually has content (not blocked by CSP)
+      if (!hasContent) {
+        // Check if iframe is accessible and has content
+        try {
+          const doc = frame.contentDocument || frame.contentWindow?.document;
+          hasContent = !!(doc && doc.body && (doc.body.innerHTML.trim() || doc.querySelector('body *')));
+        } catch {
+          hasContent = false; // cross-origin blocked = no content
+        }
+      }
+      if (!hasContent) return; // wait for load event or timeout
+
       revealed = true;
       Array.from(page.children).forEach((c) => c !== holder && c.remove());
       el.classList.remove('is-representative');
@@ -110,11 +120,32 @@ function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, na
       ro.observe(viewport);
       el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
     };
-    frame.addEventListener('load', reveal);
-    window.setTimeout(reveal, 8000);
+
+    frame.addEventListener('load', () => {
+      console.log(`[BrowserMockup] iframe load event for ${name}`);
+      // Small delay to let content render
+      setTimeout(() => {
+        hasContent = true;
+        tryReveal();
+      }, 100);
+    });
+
+    frame.addEventListener('error', (e) => {
+      console.error(`[BrowserMockup] iframe error for ${name}:`, e);
+      fallback();
+    });
+
+    // Fallback: if no content after timeout, remove iframe and keep wireframe/screenshot
+    const fallback = () => {
+      if (revealed) return;
+      console.warn(`[BrowserMockup] Live preview fallback for ${name} (blocked/blank)`);
+      holder.remove();
+      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
+    };
+    window.setTimeout(fallback, 10000);
 
     page.style.position = 'relative';
-    holder.classList.add('is-loading'); // invisible until revealed, so nothing half-drawn is shown
+    holder.classList.add('is-loading');
     page.appendChild(holder);
     fit();
   };

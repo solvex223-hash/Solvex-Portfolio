@@ -53,15 +53,18 @@ export interface LiveOptions {
 
 /**
  * Shows the real website, scaled down to the window width, inside `page` (so the existing scroll logic slides it
- * like it does a screenshot). The iframe is created only when the card is about to be seen, ignores the pointer
- * (page scrolling is never captured). On phones/data-saver it falls back to screenshot/wireframe.
+ * like it does a screenshot). The iframe is created when the card is near the viewport, ignores the pointer
+ * (page scrolling is never captured). On data-saver it falls back to screenshot/wireframe.
  * If the iframe cannot load (CSP, network error, blank), it gracefully falls back.
  */
 function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, name: string, live: LiveOptions) {
   const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
-  const isMobile = window.matchMedia('(max-width: 720px)').matches;
   const isDataSaver = nav.connection?.saveData;
-  if (isMobile || isDataSaver) return; // skip live preview, keep wireframe/screenshot
+  if (isDataSaver) return; // skip live preview on data-saver, keep wireframe/screenshot
+
+  const isMobile = window.matchMedia('(max-width: 720px)').matches;
+  const rootMargin = isMobile ? '300px 0px' : '900px 0px'; // smaller margin on mobile
+  const fallbackTimeout = isMobile ? 6000 : 10000; // shorter timeout on mobile
 
   let started = false;
   const start = () => {
@@ -101,7 +104,6 @@ function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, na
       if (revealed) return;
       // Only reveal if iframe actually has content (not blocked by CSP)
       if (!hasContent) {
-        // Check if iframe is accessible and has content
         try {
           const doc = frame.contentDocument || frame.contentWindow?.document;
           hasContent = !!(doc && doc.body && (doc.body.innerHTML.trim() || doc.querySelector('body *')));
@@ -109,7 +111,7 @@ function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, na
           hasContent = false; // cross-origin blocked = no content
         }
       }
-      if (!hasContent) return; // wait for load event or timeout
+      if (!hasContent) return;
 
       revealed = true;
       Array.from(page.children).forEach((c) => c !== holder && c.remove());
@@ -123,11 +125,7 @@ function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, na
 
     frame.addEventListener('load', () => {
       console.log(`[BrowserMockup] iframe load event for ${name}`);
-      // Small delay to let content render
-      setTimeout(() => {
-        hasContent = true;
-        tryReveal();
-      }, 100);
+      setTimeout(() => { hasContent = true; tryReveal(); }, 100);
     });
 
     frame.addEventListener('error', (e) => {
@@ -135,14 +133,13 @@ function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, na
       fallback();
     });
 
-    // Fallback: if no content after timeout, remove iframe and keep wireframe/screenshot
     const fallback = () => {
       if (revealed) return;
       console.warn(`[BrowserMockup] Live preview fallback for ${name} (blocked/blank)`);
       holder.remove();
       el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
     };
-    window.setTimeout(fallback, 10000);
+    window.setTimeout(fallback, fallbackTimeout);
 
     page.style.position = 'relative';
     holder.classList.add('is-loading');
@@ -157,7 +154,7 @@ function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, na
         start();
       }
     },
-    { rootMargin: '900px 0px' }
+    { rootMargin }
   );
   io.observe(el);
 }

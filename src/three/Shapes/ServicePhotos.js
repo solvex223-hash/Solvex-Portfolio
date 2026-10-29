@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import { PHOTO_BOX } from './imageShape.js';
 
+/** the photo is a backdrop: strong enough to read as the image, dim enough for the text in front */
+const BACKDROP_OPACITY = 0.55;
+
 const smooth = (a, b, x) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
   return t * t * (3 - 2 * t);
@@ -55,7 +58,7 @@ export class ServicePhotos {
       if (!it) continue;
       // fully on while the particles hold this shape, off as soon as they start to morph away
       const on = (1 - smooth(0.02, 0.22, Math.abs(shape - i))) * gate;
-      it.material.opacity = on;
+      it.material.opacity = on * BACKDROP_OPACITY;
       it.mesh.visible = on > 0.003;
       it.mesh.rotation.y = yaw;
       if (on > strongest) strongest = on;

@@ -13,6 +13,7 @@ import { mountHero } from './sections/Hero/Hero';
 import { mountAbout } from './sections/About/About';
 import { mountProblem } from './sections/Problem/Problem';
 import { mountSolutions } from './sections/Solutions/Solutions';
+import { mountWork } from './sections/Work/Work';
 import { loadHeroScene, type HeroScene } from './three/lazyScene';
 import { content } from './data/content';
 
@@ -34,6 +35,8 @@ export async function bootstrap() {
   const about = mountAbout();
   const problem = mountProblem();
   const solutions = mountSolutions();
+  // 05 Philosophy is not in this codebase yet: mount it here, before Selected Work
+  const work = mountWork(document.body, reduced);
 
   // Don't show the title until Sora is ready (avoids a font-swap flash)
   await withTimeout(loadFonts(), 2500);
@@ -81,7 +84,7 @@ export async function bootstrap() {
   html.classList.remove('is-loading');
 
   initScrollAnimation(
-    { hero, about, problem, solutions },
+    { hero, about, problem, solutions, work: work.scroll },
     holder.scene ?? { setStages() {} },
     reduced
   );

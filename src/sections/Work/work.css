@@ -1,0 +1,423 @@
+/* 06 — SELECTED WORK
+   Opening: one confident heading. Then one sticky stage per project (see ProjectShowcase.ts).
+   JS (workScroll.ts / ProjectShowcase.ts) sets opacity / transform from the scroll position. */
+
+.work {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- opening ---------- */
+.work__opening {
+  height: 280vh;
+  height: 280svh;
+}
+
+.work__stage {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1rem, 2.6vh, 1.8rem);
+  height: 100vh;
+  height: 100svh;
+  padding: 0 var(--pad);
+}
+
+.work__stage [data-w] {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.work__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800; /* Sora ExtraBold */
+  font-size: clamp(3rem, min(13vw, 22vh), 12rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--fg);
+  will-change: transform, opacity;
+}
+
+.work__lead {
+  max-width: 34rem;
+  margin-top: clamp(0.4rem, 1.6vh, 1.2rem);
+}
+
+/* ---------- a project ---------- */
+.project {
+  position: relative;
+  height: 420vh;
+  height: 420svh;
+}
+
+.project__stage {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  align-content: start;
+  gap: clamp(0.8rem, 2vh, 1.4rem);
+  height: 100vh;
+  height: 100svh;
+  padding: clamp(5rem, 13vh, 8rem) var(--pad) clamp(2.5rem, 7vh, 5rem);
+  overflow-x: clip;
+}
+
+.project__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem 1.4rem;
+}
+
+.project__meta > [data-p] {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.project__no {
+  color: var(--accent);
+}
+
+.project__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65em;
+  padding: 0.55em 1.05em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: clamp(0.65rem, 0.9vw, 0.82rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fg);
+  background: rgba(var(--bg-rgb), 0.5);
+}
+
+.project__status i {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.project__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.6rem, min(10.5vw, 19vh), 11rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--fg);
+  will-change: transform, opacity;
+}
+
+/* asymmetric staging: visual lower right, description lower left */
+.project__visual {
+  position: absolute;
+  right: var(--pad);
+  bottom: clamp(1.5rem, 7vh, 4rem);
+  width: min(54vw, calc(56svh * 1.6));
+  aspect-ratio: 16 / 10;
+  opacity: 0;
+  transform-origin: 50% 100%;
+  will-change: opacity, transform;
+}
+
+.project__info {
+  position: absolute;
+  left: var(--pad);
+  bottom: clamp(1.5rem, 7vh, 4rem);
+  width: min(28vw, 24rem);
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.project__tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---------- browser window ---------- */
+.browser {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(244, 244, 242, 0.14);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #15142c, #0d0c22);
+  box-shadow:
+    0 40px 120px -30px rgba(0, 0, 0, 0.85),
+    0 0 90px -45px rgba(139, 108, 255, 0.32);
+}
+
+.browser__bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.9rem;
+  height: 2.2rem;
+  padding: 0 0.9rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.browser__dots i {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.35rem;
+  border-radius: 50%;
+  background: rgba(244, 244, 242, 0.22);
+}
+
+.browser__url {
+  flex: 1;
+  max-width: 46%;
+  height: 0.9rem;
+  border-radius: 999px;
+  background: rgba(244, 244, 242, 0.08);
+}
+
+.browser__viewport {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.browser__page {
+  will-change: transform;
+}
+
+.browser__page img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* only shown while the visual is a representative layout, never over a real screenshot */
+.browser__tag {
+  position: absolute;
+  right: 0.9rem;
+  bottom: 0.7rem;
+  padding: 0.4em 0.8em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(var(--bg-rgb), 0.78);
+  font-size: 0.6rem;
+}
+
+.browser:not(.is-representative) .browser__tag {
+  display: none;
+}
+
+/* subtle reflection */
+.browser__sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.07) 0%, transparent 36%, transparent 72%, rgba(139, 108, 255, 0.06) 100%);
+}
+
+/* ---------- representative layout: abstract, contains no text or figures ---------- */
+.wf {
+  display: grid;
+  gap: 2.2em;
+  padding: 1.6em 2em 2.4em;
+  font-size: clamp(8px, 1.05vw, 15px);
+}
+
+.wf b {
+  display: block;
+  height: 0.7em;
+  border-radius: 999px;
+  background: rgba(244, 244, 242, 0.14);
+}
+
+.wf b.short {
+  width: 55%;
+}
+
+.wf i {
+  display: block;
+  border-radius: 0.5em;
+  background: rgba(244, 244, 242, 0.1);
+}
+
+.wf__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2em;
+}
+
+.wf__logo {
+  width: 6em;
+  height: 1.6em;
+  background: rgba(244, 244, 242, 0.28) !important;
+}
+
+.wf__links {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  gap: 1.6em;
+}
+
+.wf__links b {
+  width: 4em;
+}
+
+.wf__cta {
+  width: 6em;
+  height: 2em;
+  border-radius: 999px !important;
+  background: rgba(139, 108, 255, 0.55) !important;
+}
+
+.wf__hero {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 1.1em 2.4em;
+  align-content: center;
+  min-height: 15em;
+}
+
+.wf__headline,
+.wf__sub,
+.wf__btns {
+  grid-column: 1;
+}
+
+.wf__headline b {
+  height: 1.7em;
+  margin-bottom: 0.7em;
+  background: rgba(244, 244, 242, 0.3);
+}
+
+.wf__btns {
+  display: flex;
+  gap: 1em;
+}
+
+.wf__btns i {
+  width: 7em;
+  height: 2.2em;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+}
+
+.wf__btns i.solid {
+  border: 0;
+  background: rgba(244, 244, 242, 0.34);
+}
+
+.wf__art {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  min-height: 14em;
+  border: 1px solid var(--line);
+  border-radius: 1em;
+  background:
+    radial-gradient(60% 60% at 35% 30%, rgba(139, 108, 255, 0.4), transparent 70%),
+    linear-gradient(160deg, rgba(244, 244, 242, 0.08), rgba(244, 244, 242, 0.02));
+}
+
+.wf__cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.4em;
+}
+
+.wf__cards > div {
+  display: grid;
+  gap: 0.7em;
+  padding: 1.3em;
+  border: 1px solid var(--line);
+  border-radius: 0.9em;
+}
+
+.wf__cards i {
+  width: 2.2em;
+  height: 2.2em;
+  border-radius: 50%;
+  background: rgba(139, 108, 255, 0.4);
+}
+
+.wf__band {
+  display: grid;
+  gap: 0.8em;
+  padding: 2.4em;
+  border: 1px solid var(--line);
+  border-radius: 1em;
+  background: linear-gradient(120deg, rgba(139, 108, 255, 0.22), rgba(244, 244, 242, 0.04));
+}
+
+.wf__band i {
+  width: 7em;
+  height: 2em;
+  margin-top: 0.6em;
+  border-radius: 999px;
+  background: rgba(244, 244, 242, 0.3);
+}
+
+.wf__foot {
+  display: flex;
+  gap: 3em;
+  padding-top: 1em;
+}
+
+.wf__foot b {
+  width: 8em;
+}
+
+/* ---------- phones / portrait ---------- */
+@media (max-aspect-ratio: 1/1) {
+  .work__title {
+    font-size: clamp(3rem, 15vw, 7rem);
+  }
+
+  .project__stage {
+    grid-template-rows: auto auto auto auto;
+    align-content: center;
+    gap: 1.1rem;
+    padding: 4.5rem var(--pad) 2.5rem;
+  }
+
+  .project__title {
+    font-size: clamp(2.4rem, 13vw, 6rem);
+  }
+
+  .project__visual {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    max-height: 38svh;
+    aspect-ratio: 16 / 11;
+  }
+
+  .project__info {
+    position: static;
+    width: 100%;
+  }
+
+  .wf {
+    font-size: clamp(5px, 1.9vw, 9px);
+  }
+}

@@ -3,6 +3,11 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { SceneStages } from '../three/lazyScene';
 import { createSolutionsScroll } from '../sections/Solutions/solutionsScroll';
 
+interface WorkScroll {
+  measure(): void;
+  update(y: number): { calm: number };
+}
+
 gsap.registerPlugin(ScrollTrigger);
 
 interface StageTarget {
@@ -14,6 +19,7 @@ interface Sections {
   about: HTMLElement;
   problem: HTMLElement;
   solutions: HTMLElement;
+  work?: WorkScroll; // 06 — Selected Work
 }
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v));
@@ -27,7 +33,7 @@ const range = (v: number, a: number, b: number) => smooth(clamp((v - a) / (b - a
 export function initScrollAnimation(sections: Sections, scene: StageTarget, reduced = false) {
   ScrollTrigger.config({ ignoreMobileResize: true });
 
-  const { hero, about, problem, solutions } = sections;
+  const { hero, about, problem, solutions, work } = sections;
   const sol = createSolutionsScroll(solutions, reduced); // drives its own text; shares this scroll listener
   let heroH = 1;
   let aboutTop = 0;
@@ -41,6 +47,7 @@ export function initScrollAnimation(sections: Sections, scene: StageTarget, redu
     aboutTop = about.getBoundingClientRect().top + y;
     problemTop = problem.getBoundingClientRect().top + y;
     sol.measure();
+    work?.measure();
   };
 
   const update = () => {
@@ -54,6 +61,7 @@ export function initScrollAnimation(sections: Sections, scene: StageTarget, redu
       form: range(a, 0.7, 1.7), // particles -> team hologram
       dissolve: range(b, 0.05, 0.85), // hologram -> fragmented system
       ...sol.update(y), // fragments reconnect -> ten services -> settled system
+      ...(work ? work.update(y) : {}), // the backdrop recedes behind Selected Work
     });
   };
 

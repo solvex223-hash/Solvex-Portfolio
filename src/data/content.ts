@@ -122,4 +122,11 @@ export const content = {
       },
     ],
   },
+
+  // 06 — SELECTED WORK
+  work: {
+    label: '06 — SELECTED WORK',
+    heading: ['SELECTED', 'WORK.'],
+    lead: 'Explore selected projects, internal products, demonstrations and concepts created by SolveX.',
+  },
 };

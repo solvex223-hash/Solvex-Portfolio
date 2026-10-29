@@ -33,6 +33,7 @@ const VERT = /* glsl */ `
   uniform float uService; // continuous shape index 0..10
   uniform sampler2D uShapes;
   uniform sampler2D uShapeCols;
+  uniform float uCalm; // 0..1: the backdrop recedes behind later sections
   uniform float uSvcPhoto; // 0..1: how strongly the real service photo covers the particles
   uniform float uShapeRows;
   uniform vec3 uBase;
@@ -176,12 +177,14 @@ const VERT = /* glsl */ `
     float photoCover = 1.0 - 0.92 * uPhoto * f;
     vAlpha = mix(aT, aH, f) * mix(1.0, 0.5, d) * photoCover * uVis;
     float tw = 0.92 + 0.08 * sin(uTime * (0.4 + fH * 0.8) + aSeed * 60.0);
-    // ambient dust stays faint and keeps clear of the write-up (left on wide screens, bottom when stacked)
-    float dustKeep = uAspect >= 1.0 ? smoothstep(-0.55, 0.0, ndc.x) : smoothstep(-0.55, 0.05, ndc.y);
+    // ambient dust stays faint and keeps clear of the centred write-up
+    float dustKeep = smoothstep(0.25, 0.8, length(ndc / (uAspect >= 1.0 ? vec2(0.6, 0.45) : vec2(0.95, 0.4))));
     float objA = mix((0.36 + 0.64 * xTone) * tw, (0.55 + 0.45 * xTone) * tw, xHas);
     float dustA = (0.1 + 0.18 * fH) * mix(0.3, 1.0, dustKeep);
     vAlpha = mix(vAlpha, mix(objA, dustA, xDust), xc);
     vAlpha *= 1.0 - 0.7 * uSvcPhoto * xHas * xc; // once the photo has taken over, the particles recede to a fine grain
+    vAlpha *= mix(1.0, 0.65, xHas * xc); // the formed images are a backdrop behind the text
+    vAlpha *= 1.0 - 0.9 * uCalm * xc; // Selected Work and later: leave the stage to the content
     vXc = xc;
 
     // colour: silver and soft white; the accent only touches selected parts of each object
@@ -285,6 +288,7 @@ export class SystemParticles {
         uShapes: { value: shapes.texture },
         uShapeCols: { value: shapes.colorTexture },
         uSvcPhoto: { value: 0 },
+        uCalm: { value: 0 },
         uShapeRows: { value: shapes.rows },
         ...createPaletteUniforms(),
       },
@@ -292,6 +296,10 @@ export class SystemParticles {
 
     this.points = new THREE.Points(geo, this.material);
     this.points.frustumCulled = false; // positions are computed in the shader
+  }
+
+  setCalm(v) {
+    this.material.uniforms.uCalm.value = v;
   }
 
   setServicePhoto(v) {

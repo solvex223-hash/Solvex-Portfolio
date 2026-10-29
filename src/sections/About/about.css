@@ -48,20 +48,35 @@
   color: var(--fg);
 }
 
+/* Portrait / phones: the picture assembles at the top while the text stays pinned underneath.
+   The section keeps the SAME scroll length as on desktop (220svh). It used to collapse to the height of
+   its text, so the next section started dissolving the hologram before the team photo had formed. */
 @media (max-aspect-ratio: 1/1) {
   .about {
-    min-height: 0;
-    padding-top: 58vh;
-    padding-top: 58svh;
-    padding-bottom: 14svh;
+    min-height: 220vh;
+    min-height: 220svh;
+    padding-top: 0;
+    padding-bottom: 0;
   }
   .about::before {
-    background: linear-gradient(180deg, transparent 0, rgba(var(--bg-rgb), 0.9) 52svh, rgba(var(--bg-rgb), 0.96) 100%);
+    display: none;
   }
   .about__inner {
-    position: static;
-    min-height: 0;
+    position: sticky;
+    top: 0;
+    min-height: 100vh;
+    min-height: 100svh;
     max-width: none;
-    padding: 0;
+    justify-content: flex-end;
+    padding: 0 0 9svh;
+  }
+  /* darkens only the lower part of the pinned screen, behind the text */
+  .about__inner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 0, transparent 46%, rgba(var(--bg-rgb), 0.9) 62%, rgba(var(--bg-rgb), 0.96) 100%);
   }
 }

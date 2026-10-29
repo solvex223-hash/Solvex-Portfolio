@@ -141,8 +141,8 @@ export async function createThreeScene(mount, { reduced = false } = {}) {
   document.documentElement.addEventListener('pointerleave', onLeave);
 
   // ---------- state ----------
-  const target = { hero: 0, scatter: 0, form: 0, dissolve: 0, connect: 0, service: 0, settle: 0 };
-  const cur = { hero: 0, scatter: 0, form: 0, dissolve: 0, connect: 0, service: 0, settle: 0 };
+  const target = { hero: 0, scatter: 0, form: 0, dissolve: 0, connect: 0, service: 0, settle: 0, calm: 0 };
+  const cur = { hero: 0, scatter: 0, form: 0, dissolve: 0, connect: 0, service: 0, settle: 0, calm: 0 };
   const state = { intro: 0, time: 0 };
 
   function step(dt) {
@@ -157,6 +157,7 @@ export async function createThreeScene(mount, { reduced = false } = {}) {
     cur.connect += (target.connect - cur.connect) * k(2.2);
     cur.service += (target.service - cur.service) * k(3.4);
     cur.settle += (target.settle - cur.settle) * k(1.8);
+    cur.calm += (target.calm - cur.calm) * k(2.0);
 
     head.update(state.time, dt, cur);
 
@@ -164,7 +165,8 @@ export async function createThreeScene(mount, { reduced = false } = {}) {
     const photoOn = range(cur.form, 0.78, 1.0) * (1 - range(cur.dissolve, 0, 0.35));
     particles.update(state.time, cur, head.towerRot, photoOn, head.tilt);
     photo?.update(photoOn, holoScale);
-    particles.setServicePhoto(svcPhotos.update(cur.service, range(cur.connect, 0.85, 1.0), state.time));
+    particles.setServicePhoto(svcPhotos.update(cur.service, range(cur.connect, 0.85, 1.0) * (1 - cur.calm), state.time));
+    particles.setCalm(cur.calm);
 
     rig.update(cur, dt, state.intro);
 
@@ -244,6 +246,7 @@ export async function createThreeScene(mount, { reduced = false } = {}) {
       if (s.connect !== undefined) target.connect = clamp(s.connect, 0, 1);
       if (s.service !== undefined) target.service = clamp(s.service, 0, 10);
       if (s.settle !== undefined) target.settle = clamp(s.settle, 0, 1);
+      if (s.calm !== undefined) target.calm = clamp(s.calm, 0, 1);
     },
     setPalette(p) {
       particles.setPalette(p);

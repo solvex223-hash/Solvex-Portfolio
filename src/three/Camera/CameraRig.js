@@ -48,11 +48,9 @@ export class CameraRig {
     const toProblem = range(d.dissolve, 0, 1);
     const toSol = range(d.connect || 0, 0, 1);
 
-    // the object sits to the right of the text on landscape screens, above it on portrait ones;
-    // pull back on narrow windows so a ~7.6 unit wide object always fits its half of the screen
-    const solDist = stacked
-      ? Math.max(16, 7.6 / (0.9 * cam.aspect * 2 * tanH))
-      : Math.max(14.5, 8.0 / (0.5 * cam.aspect * 2 * tanH));
+    // the service image is a backdrop centred behind the text: fit the whole 8 x 6.6 unit image to the
+    // screen (height on wide screens, width on narrow ones)
+    const solDist = Math.max(6.6 / (0.94 * 2 * tanH), 8.0 / ((stacked ? 1.12 : 0.96) * 2 * tanH * cam.aspect)); // phones: let the image fill the width
     const solFit = solDist / SOLUTIONS.z; // SOLUTIONS.z is the 16 unit reference distance
 
 
@@ -74,9 +72,9 @@ export class CameraRig {
 
     // screen composition: subject to the right of the text (wide screens) / above it (stacked)
     const heroShiftX = lerp(0.08, 0.24, clamp((cam.aspect - 1.0) / 0.78, 0, 1));
-    const shiftX = stacked ? 0 : lerp(heroShiftX, 0.2, toAbout) * (1 - toProblem) + 0.2 * toSol;
+    const shiftX = stacked ? 0 : lerp(heroShiftX, 0.2, toAbout) * (1 - toProblem) * (1 - toSol);
     const shiftY = stacked
-      ? lerp(0.22, 0.2, toAbout) * (1 - toProblem * 0.7) * (1 - toSol) + 0.21 * toSol
+      ? lerp(0.22, 0.2, toAbout) * (1 - toProblem * 0.7) * (1 - toSol)
       : 0;
     cam.setViewOffset(this.w, this.h, -shiftX * this.w, shiftY * this.h, this.w, this.h);
   }

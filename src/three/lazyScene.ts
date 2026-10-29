@@ -6,6 +6,7 @@ export interface SceneStages {
   connect?: number; // 0..1 the fragments reconnect into an organised system
   service?: number; // 0..10 continuous scroll position through the services (evolves + pans the field)
   settle?: number; // 0..1 the final formation settles into a coherent whole
+  calm?: number; // 0..1 the particle backdrop recedes (Selected Work and later sections)
 }
 
 export interface HeroScene {

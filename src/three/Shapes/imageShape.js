@@ -7,7 +7,7 @@
  * returns { pos: Float32Array(n*3), col: Uint8Array(n*3) sRGB, tone: Float32Array(n) }
  */
 /** world-space box every service photo is fitted into (particles and the photo plane share it) */
-export const PHOTO_BOX = { w: 7.6, h: 6.4 };
+export const PHOTO_BOX = { w: 8.0, h: 6.6 };
 
 export function sampleImage(img, n, R, { boxW = PHOTO_BOX.w, boxH = PHOTO_BOX.h, relief = 0.8 } = {}) {
   const { data, width: W, height: H } = img;

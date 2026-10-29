@@ -236,12 +236,19 @@ export async function loadTeamPhoto(url, count) {
   const small = readPixels(img, 460);
   const points = pointsFromPixels(small.data, small.width, small.height, count);
 
-  const full = readPixels(img, img.naturalWidth);
-  const cut = cutoutFromPixels(full.data, full.width, full.height);
-  const photo = document.createElement('canvas');
-  photo.width = cut.width;
-  photo.height = cut.height;
-  photo.getContext('2d').putImageData(new ImageData(cut.rgba, cut.width, cut.height), 0, 0);
+  // the cut-out is the memory-heavy part: cap it, and never let a failure here lose the particles
+  let photo = null;
+  try {
+    const full = readPixels(img, Math.min(img.naturalWidth, 1600));
+    const cut = cutoutFromPixels(full.data, full.width, full.height);
+    photo = document.createElement('canvas');
+    photo.width = cut.width;
+    photo.height = cut.height;
+    photo.getContext('2d').putImageData(new ImageData(cut.rgba, cut.width, cut.height), 0, 0);
+  } catch (err) {
+    console.warn('[scene] team photo cut-out failed, showing the particles only', err);
+    photo = null;
+  }
 
   return { ...points, photo };
 }

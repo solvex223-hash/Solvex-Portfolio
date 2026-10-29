@@ -45,6 +45,86 @@ function loadFirst(urls: string[]): Promise<string | null> {
   );
 }
 
+export interface LiveOptions {
+  url: string;
+  width: number;
+  height: number;
+}
+
+/**
+ * Shows the real website, scaled down to the window width, inside `page` (so the existing scroll logic slides it
+ * like it does a screenshot). The iframe is created only when the card is about to be seen, ignores the pointer
+ * (page scrolling is never captured) and is skipped on phones / data-saver. If it cannot load, nothing changes.
+ */
+function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, name: string, live: LiveOptions) {
+  const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
+  if (window.matchMedia('(max-width: 720px)').matches || nav.connection?.saveData) return;
+
+  let started = false;
+  const start = () => {
+    if (started) return;
+    started = true;
+
+    const holder = document.createElement('div');
+    holder.className = 'browser__live';
+    const frame = document.createElement('iframe');
+    frame.src = live.url;
+    frame.title = `${name} website (live preview)`;
+    frame.width = String(live.width);
+    frame.height = String(live.height);
+    frame.tabIndex = -1;
+    frame.setAttribute('aria-hidden', 'true');
+    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    frame.referrerPolicy = 'no-referrer';
+    holder.appendChild(frame);
+
+    const fit = () => {
+      const s = viewport.clientWidth / live.width;
+      frame.style.transform = `scale(${s})`;
+      holder.style.height = `${live.height * s}px`;
+      page.style.height = `${live.height * s}px`;
+    };
+    const ro = new ResizeObserver(() => {
+      fit();
+      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true })); // re-measure the scroll distance
+    });
+
+    // 'load' only fires after every photo and video of the site has downloaded, which can take a long time on a
+    // heavy page. So the preview is shown on 'load' OR after a short delay, whichever comes first, and is never
+    // thrown away for being slow.
+    let revealed = false;
+    const reveal = () => {
+      if (revealed) return;
+      revealed = true;
+      Array.from(page.children).forEach((c) => c !== holder && c.remove());
+      el.classList.remove('is-representative');
+      el.classList.add('is-live');
+      holder.classList.remove('is-loading');
+      fit();
+      ro.observe(viewport);
+      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
+    };
+    frame.addEventListener('load', reveal);
+    window.setTimeout(reveal, 3500);
+
+    page.style.position = 'relative';
+    holder.classList.add('is-loading'); // invisible until revealed, so nothing half-drawn is shown
+    page.appendChild(holder);
+    fit();
+  };
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        io.disconnect();
+        start();
+      }
+    },
+    { rootMargin: '900px 0px' }
+  );
+  io.observe(el);
+}
+
 export interface BrowserVisual {
   el: HTMLElement;
   /** the scrolling page inside the window, and its viewport */
@@ -52,7 +132,7 @@ export interface BrowserVisual {
   viewport: HTMLElement;
 }
 
-export function createBrowserMockup(name: string, screenshots: string[]): BrowserVisual {
+export function createBrowserMockup(name: string, screenshots: string[], live?: LiveOptions): BrowserVisual {
   const el = document.createElement('div');
   el.className = 'browser is-representative';
   el.innerHTML = `
@@ -79,6 +159,8 @@ export function createBrowserMockup(name: string, screenshots: string[]): Browse
     el.classList.remove('is-representative'); // real screenshot: hide the tag
     el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
   });
+
+  if (live) mountLive(el, page, viewport, name, live);
 
   return { el, page, viewport };
 }

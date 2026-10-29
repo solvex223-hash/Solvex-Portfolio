@@ -421,3 +421,27 @@
     font-size: clamp(5px, 1.9vw, 9px);
   }
 }
+
+/* ---------- live website preview (see visuals/BrowserMockup.ts) ---------- */
+.browser__live {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  transition: opacity 0.6s ease;
+}
+
+.browser__live.is-loading {
+  opacity: 0;
+}
+
+.browser__live iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 0;
+  background: #fff;
+  transform-origin: 0 0;
+  pointer-events: none; /* never captures the wheel or touch: the page keeps scrolling */
+}

@@ -44,7 +44,7 @@ export function mountProject(parent: HTMLElement, project: Project, reduced: boo
 
   // ----- visual (more kinds are added with later projects) -----
   const holder = el.querySelector<HTMLElement>('.project__visual')!;
-  const visual: BrowserVisual = createBrowserMockup(project.name, project.visual.screenshots);
+  const visual: BrowserVisual = createBrowserMockup(project.name, project.visual.screenshots, project.visual.live);
   holder.appendChild(visual.el);
 
   const q = <T extends HTMLElement>(s: string) => el.querySelector<T>(s)!;

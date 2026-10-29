@@ -53,8 +53,7 @@ export interface LiveOptions {
 
 /**
  * Shows the real website, scaled down to the window width, inside `page` (so the existing scroll logic slides it
- * like it does a screenshot). The iframe is created when the card is near the viewport, ignores the pointer
- * (page scrolling is never captured). On data-saver it falls back to screenshot/wireframe.
+ * like it does a screenshot). Starts loading immediately on mount. On data-saver falls back to screenshot/wireframe.
  * If the iframe cannot load (CSP, network error, blank), it gracefully falls back.
  */
 function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, name: string, live: LiveOptions) {
@@ -63,100 +62,86 @@ function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, na
   if (isDataSaver) return; // skip live preview on data-saver, keep wireframe/screenshot
 
   const isMobile = window.matchMedia('(max-width: 720px)').matches;
-  const rootMargin = isMobile ? '300px 0px' : '900px 0px'; // smaller margin on mobile
-  const fallbackTimeout = isMobile ? 6000 : 10000; // shorter timeout on mobile
+  const fallbackTimeout = isMobile ? 6000 : 10000;
 
-  let started = false;
-  const start = () => {
-    if (started) return;
-    started = true;
+  // Start immediately - no IntersectionObserver delay
+  const holder = document.createElement('div');
+  holder.className = 'browser__live';
+  const frame = document.createElement('iframe');
+  frame.src = live.url;
+  frame.title = `${name} website (live preview)`;
+  frame.width = String(live.width);
+  frame.height = String(live.height);
+  frame.tabIndex = -1;
+  frame.setAttribute('aria-hidden', 'true');
+  // allow-scripts + allow-same-origin: needed for cross-origin iframe to render content
+  // allow-top-navigation: lets site redirect if needed
+  frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-top-navigation');
+  frame.referrerPolicy = 'no-referrer';
+  holder.appendChild(frame);
 
-    const holder = document.createElement('div');
-    holder.className = 'browser__live';
-    const frame = document.createElement('iframe');
-    frame.src = live.url;
-    frame.title = `${name} website (live preview)`;
-    frame.width = String(live.width);
-    frame.height = String(live.height);
-    frame.tabIndex = -1;
-    frame.setAttribute('aria-hidden', 'true');
-    // allow-scripts + allow-same-origin: needed for cross-origin iframe to render content
-    // allow-top-navigation: lets site redirect if needed
-    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-top-navigation');
-    frame.referrerPolicy = 'no-referrer';
-    holder.appendChild(frame);
-
-    const fit = () => {
-      const s = viewport.clientWidth / live.width;
-      frame.style.transform = `scale(${s})`;
-      holder.style.height = `${live.height * s}px`;
-      page.style.height = `${live.height * s}px`;
-    };
-    const ro = new ResizeObserver(() => {
-      fit();
-      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
-    });
-
-    let revealed = false;
-    let hasContent = false;
-
-    const tryReveal = () => {
-      if (revealed) return;
-      // Only reveal if iframe actually has content (not blocked by CSP)
-      if (!hasContent) {
-        try {
-          const doc = frame.contentDocument || frame.contentWindow?.document;
-          hasContent = !!(doc && doc.body && (doc.body.innerHTML.trim() || doc.querySelector('body *')));
-        } catch {
-          hasContent = false; // cross-origin blocked = no content
-        }
-      }
-      if (!hasContent) return;
-
-      revealed = true;
-      Array.from(page.children).forEach((c) => c !== holder && c.remove());
-      el.classList.remove('is-representative');
-      el.classList.add('is-live');
-      holder.classList.remove('is-loading');
-      fit();
-      ro.observe(viewport);
-      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
-    };
-
-    frame.addEventListener('load', () => {
-      console.log(`[BrowserMockup] iframe load event for ${name}`);
-      setTimeout(() => { hasContent = true; tryReveal(); }, 100);
-    });
-
-    frame.addEventListener('error', (e) => {
-      console.error(`[BrowserMockup] iframe error for ${name}:`, e);
-      fallback();
-    });
-
-    const fallback = () => {
-      if (revealed) return;
-      console.warn(`[BrowserMockup] Live preview fallback for ${name} (blocked/blank)`);
-      holder.remove();
-      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
-    };
-    window.setTimeout(fallback, fallbackTimeout);
-
-    page.style.position = 'relative';
-    holder.classList.add('is-loading');
-    page.appendChild(holder);
+  const fit = () => {
+    const s = viewport.clientWidth / live.width;
+    frame.style.transform = `scale(${s})`;
+    frame.style.transformOrigin = '0 0';
+    const scaledHeight = live.height * s;
+    holder.style.height = `${scaledHeight}px`;
+    holder.style.width = `${live.width * s}px`;
+    page.style.height = `${scaledHeight}px`;
+  };
+  const ro = new ResizeObserver(() => {
     fit();
+    el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
+  });
+
+  let revealed = false;
+  let hasContent = false;
+
+  const tryReveal = () => {
+    if (revealed) return;
+    // Only reveal if iframe actually has content (not blocked by CSP)
+    if (!hasContent) {
+      try {
+        const doc = frame.contentDocument || frame.contentWindow?.document;
+        hasContent = !!(doc && doc.body && (doc.body.innerHTML.trim() || doc.querySelector('body *')));
+      } catch {
+        hasContent = false; // cross-origin blocked = no content
+      }
+    }
+    if (!hasContent) return;
+
+    revealed = true;
+    Array.from(page.children).forEach((c) => c !== holder && c.remove());
+    el.classList.remove('is-representative');
+    el.classList.add('is-live');
+    holder.classList.remove('is-loading');
+    fit();
+    ro.observe(viewport);
+    el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
   };
 
-  const io = new IntersectionObserver(
-    (entries) => {
-      if (entries.some((e) => e.isIntersecting)) {
-        io.disconnect();
-        start();
-      }
-    },
-    { rootMargin }
-  );
-  io.observe(el);
+  frame.addEventListener('load', () => {
+    console.log(`[BrowserMockup] iframe load event for ${name}`);
+    setTimeout(() => { hasContent = true; tryReveal(); }, 100);
+  });
+
+  frame.addEventListener('error', (e) => {
+    console.error(`[BrowserMockup] iframe error for ${name}:`, e);
+    fallback();
+  });
+
+  const fallback = () => {
+    if (revealed) return;
+    console.warn(`[BrowserMockup] Live preview fallback for ${name} (blocked/blank)`);
+    holder.remove();
+    el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
+  };
+  window.setTimeout(fallback, fallbackTimeout);
+
+  page.style.position = 'relative';
+  holder.classList.add('is-loading');
+  page.appendChild(holder);
+  fit();
 }
 
 export interface BrowserVisual {

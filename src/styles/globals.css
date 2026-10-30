@@ -12,6 +12,8 @@
   --muted: rgba(244, 244, 242, 0.5);
   --line: rgba(244, 244, 242, 0.14);
   --accent: #8b6cff; /* restrained violet, used sparingly */
+  --accent-green: #25d366; /* WhatsApp green, for automation indicators */
+  --accent-violet: #8b6cff; /* violet highlight for stage indicators */
 
   --font-display: 'Sora', sans-serif;
   --font-body: 'Manrope', sans-serif;

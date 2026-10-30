@@ -13,6 +13,11 @@ interface AriaScroll {
   update(y: number): { calm?: number; service?: number };
 }
 
+interface WhatsAppScroll {
+  measure(): void;
+  update(y: number): { calm?: number; service?: number };
+}
+
 gsap.registerPlugin(ScrollTrigger);
 
 interface StageTarget {
@@ -26,6 +31,7 @@ interface Sections {
   solutions: HTMLElement;
   work?: WorkScroll; // 06 — Selected Work
   aria?: AriaScroll; // 08 — ARIA
+  whatsapp?: WhatsAppScroll; // 09 — WhatsApp Automation
 }
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v));
@@ -39,7 +45,7 @@ const range = (v: number, a: number, b: number) => smooth(clamp((v - a) / (b - a
 export function initScrollAnimation(sections: Sections, scene: StageTarget, reduced = false) {
   ScrollTrigger.config({ ignoreMobileResize: true });
 
-  const { hero, about, problem, solutions, work, aria } = sections;
+  const { hero, about, problem, solutions, work, aria, whatsapp } = sections;
   const sol = createSolutionsScroll(solutions, reduced); // drives its own text; shares this scroll listener
   let heroH = 1;
   let aboutTop = 0;
@@ -55,6 +61,7 @@ export function initScrollAnimation(sections: Sections, scene: StageTarget, redu
     sol.measure();
     work?.measure();
     aria?.measure();
+    whatsapp?.measure();
   };
 
   const update = () => {
@@ -70,6 +77,7 @@ export function initScrollAnimation(sections: Sections, scene: StageTarget, redu
       ...sol.update(y), // fragments reconnect -> ten services -> settled system
       ...(work ? work.update(y) : {}), // the backdrop recedes behind Selected Work
       ...(aria ? aria.update(y) : {}), // ARIA: the core forms and the backdrop is brought back
+      ...(whatsapp ? whatsapp.update(y) : {}), // WhatsApp: the workflow forms and the backdrop is brought back
     });
   };
 

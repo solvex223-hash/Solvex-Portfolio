@@ -15,6 +15,7 @@ import { mountProblem } from './sections/Problem/Problem';
 import { mountSolutions } from './sections/Solutions/Solutions';
 import { mountWork } from './sections/Work/Work';
 import { mountAria } from './sections/Aria/Aria';
+import { mountWhatsApp } from './sections/WhatsApp/WhatsApp';
 import { loadHeroScene, type HeroScene } from './three/lazyScene';
 import { content } from './data/content';
 
@@ -39,6 +40,7 @@ export async function bootstrap() {
   // 05 Philosophy is not in this codebase yet: mount it here, before Selected Work
   const work = mountWork(document.body, reduced);
   const aria = mountAria(document.body, reduced); // 08 — ARIA, directly after Intercloud
+  const whatsapp = mountWhatsApp(document.body, reduced); // 09 — WhatsApp Automation demo
 
   // Don't show the title until Sora is ready (avoids a font-swap flash)
   await withTimeout(loadFonts(), 2500);
@@ -86,7 +88,7 @@ export async function bootstrap() {
   html.classList.remove('is-loading');
 
   initScrollAnimation(
-    { hero, about, problem, solutions, work: work.scroll, aria: aria.scroll },
+    { hero, about, problem, solutions, work: work.scroll, aria: aria.scroll, whatsapp: whatsapp.scroll },
     holder.scene ?? { setStages() {} },
     reduced
   );

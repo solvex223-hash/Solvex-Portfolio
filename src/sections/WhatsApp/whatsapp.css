@@ -1,0 +1,505 @@
+/* 09 — WHATSAPP AUTOMATION (demo)
+   A cinematic product demonstration of a WhatsApp business workflow.
+   JS (whatsappScroll.ts) sets opacity / transform from the scroll position. */
+
+.whatsapp {
+  position: relative;
+  z-index: 1;
+  height: 520vh;
+  height: 520svh;
+}
+
+.whatsapp__stage {
+  position: sticky;
+  top: 0;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  height: 100svh;
+  padding: 0 var(--pad);
+  text-align: center;
+}
+
+/* soft dark pool behind the centred text, over the particle core */
+.whatsapp__stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(58% 54% at 50% 50%, rgba(var(--bg-rgb), 0.55) 0%, rgba(var(--bg-rgb), 0.28) 60%, transparent 100%);
+}
+
+.whatsapp__top {
+  position: absolute;
+  top: clamp(4.2rem, 11vh, 6.5rem);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  opacity: 0;
+}
+
+.whatsapp__label {
+  color: var(--fg-soft);
+}
+
+.whatsapp__cat {
+  color: var(--muted);
+}
+
+/* the name: huge, silver, fades towards its base */
+.whatsapp__mark {
+  grid-area: 1 / 1;
+  opacity: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(6rem, min(26vw, 42vh), 25rem);
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  will-change: opacity, transform;
+}
+
+.whatsapp__mark .line-inner {
+  background: linear-gradient(180deg, var(--fg) 15%, rgba(244, 244, 242, 0.3) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.whatsapp__copy {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.8rem, 2.2vh, 1.5rem);
+  max-width: min(92vw, 62rem);
+  transform-origin: 50% 0;
+  will-change: transform;
+}
+
+.whatsapp__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(3rem, min(11vw, 18vh), 10rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--fg);
+  opacity: 0;
+  text-shadow: 0 2px 30px rgba(var(--bg-rgb), 0.9);
+}
+
+.whatsapp__sub {
+  margin: 0;
+  max-width: 28ch;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: calc(var(--h-size) * 0.62);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--fg);
+  opacity: 0;
+  text-shadow: 0 2px 24px rgba(var(--bg-rgb), 0.95);
+}
+
+.whatsapp__desc {
+  max-width: 38rem;
+  opacity: 0;
+  text-shadow: 0 1px 18px rgba(var(--bg-rgb), 0.95);
+}
+
+/* ---------- the workflow visual ---------- */
+.whatsapp__visual {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(1.4rem, 6vh, 3.6rem);
+  margin-inline: auto;
+  width: min(92vw, 70rem);
+  max-height: 55vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+/* Flow indicator connecting stages */
+.whatsapp__flow {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent 0%, var(--accent-green) 20%, var(--accent-green) 80%, transparent 100%);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Stage row */
+.whatsapp__stage-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  position: relative;
+  z-index: 1;
+}
+
+.whatsapp__stage-row:nth-child(odd) .whatsapp__stage-bubble {
+  justify-self: end;
+  text-align: right;
+}
+
+.whatsapp__stage-row:nth-child(odd) .whatsapp__stage-panel {
+  justify-self: start;
+}
+
+.whatsapp__stage-row:nth-child(even) .whatsapp__stage-bubble {
+  justify-self: start;
+  text-align: left;
+}
+
+.whatsapp__stage-row:nth-child(even) .whatsapp__stage-panel {
+  justify-self: end;
+}
+
+/* Stage number indicator */
+.whatsapp__stage-num {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-violet));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: #050505;
+  box-shadow: 0 0 20px 4px rgba(37, 211, 102, 0.4);
+  z-index: 2;
+}
+
+/* Message bubble */
+.whatsapp__stage-bubble {
+  max-width: 28rem;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  font-family: var(--font-body);
+  font-size: clamp(0.85rem, 1.1vw, 1rem);
+  line-height: 1.55;
+  color: var(--fg);
+  opacity: 0;
+  transform: translateY(20px);
+  will-change: opacity, transform;
+}
+
+.whatsapp__stage-row:nth-child(odd) .whatsapp__stage-bubble {
+  background: rgba(37, 211, 102, 0.12);
+  border: 1px solid rgba(37, 211, 102, 0.3);
+  border-bottom-right-radius: 4px;
+}
+
+.whatsapp__stage-row:nth-child(even) .whatsapp__stage-bubble {
+  background: rgba(139, 108, 255, 0.12);
+  border: 1px solid rgba(139, 108, 255, 0.3);
+  border-bottom-left-radius: 4px;
+}
+
+.whatsapp__stage-bubble.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+/* Stage panel (lead info / workflow) */
+.whatsapp__stage-panel {
+  width: min(28rem, 100%);
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(20, 19, 44, 0.92), rgba(11, 10, 30, 0.92));
+  box-shadow:
+    0 20px 60px -20px rgba(0, 0, 0, 0.8),
+    0 0 50px -30px rgba(37, 211, 102, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  transform: translateY(20px);
+  will-change: opacity, transform;
+}
+
+.whatsapp__stage-panel.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.whatsapp__panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.whatsapp__panel-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent-green);
+  box-shadow: 0 0 10px 2px rgba(37, 211, 102, 0.5);
+}
+
+.whatsapp__panel-title {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.whatsapp__panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.whatsapp__panel-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6rem 1rem;
+  align-items: baseline;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.whatsapp__panel-label {
+  color: var(--muted);
+}
+
+.whatsapp__panel-value {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+/* Status badge */
+.whatsapp__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35em 0.8em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-soft);
+  background: rgba(var(--bg-rgb), 0.6);
+}
+
+.whatsapp__status--active {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  background: rgba(37, 211, 102, 0.1);
+}
+
+.whatsapp__status-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.whatsapp__status--active .whatsapp__status-dot {
+  background: var(--accent-green);
+  box-shadow: 0 0 8px 2px rgba(37, 211, 102, 0.6);
+}
+
+/* Automation indicator */
+.whatsapp__auto-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3em 0.7em;
+  border: 1px solid rgba(37, 211, 102, 0.4);
+  border-radius: 999px;
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-green);
+  background: rgba(37, 211, 102, 0.08);
+}
+
+.whatsapp__auto-indicator svg {
+  width: 0.7rem;
+  height: 0.7rem;
+  stroke: var(--accent-green);
+}
+
+/* Complete workflow view */
+.whatsapp__complete {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(37, 211, 102, 0.2);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(15, 25, 15, 0.6), rgba(8, 15, 8, 0.6));
+  opacity: 0;
+  transform: translateY(16px);
+  will-change: opacity, transform;
+}
+
+.whatsapp__complete.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.whatsapp__complete-title {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.1rem, 2vw, 1.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.whatsapp__complete-steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.whatsapp__step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--fg-soft);
+  transition: border-color 0.3s, background 0.3s, color 0.3s;
+}
+
+.whatsapp__step.is-active {
+  border-color: var(--accent-green);
+  background: rgba(37, 211, 102, 0.12);
+  color: var(--fg);
+}
+
+.whatsapp__step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--line);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+.whatsapp__step.is-active .whatsapp__step-num {
+  background: var(--accent-green);
+  color: #050505;
+}
+
+/* ---------- phones / portrait ---------- */
+@media (max-aspect-ratio: 1/1) {
+  .whatsapp__stage::before {
+    background: radial-gradient(95% 50% at 50% 46%, rgba(var(--bg-rgb), 0.6) 0%, rgba(var(--bg-rgb), 0.3) 62%, transparent 100%);
+  }
+
+  .whatsapp__mark {
+    font-size: clamp(5rem, 34vw, 14rem);
+  }
+
+  .whatsapp__title {
+    font-size: clamp(2.8rem, 15vw, 7rem);
+  }
+
+  .whatsapp__sub {
+    font-size: calc(var(--h-size) * 0.8);
+    max-width: 22ch;
+  }
+
+  .whatsapp__visual {
+    bottom: 1rem;
+    max-height: 65vh;
+  }
+
+  .whatsapp__stage-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .whatsapp__stage-row:nth-child(odd) .whatsapp__stage-bubble,
+  .whatsapp__stage-row:nth-child(even) .whatsapp__stage-bubble {
+    justify-self: center;
+    text-align: left;
+    max-width: 100%;
+    border-radius: 14px;
+  }
+
+  .whatsapp__stage-row:nth-child(odd) .whatsapp__stage-panel,
+  .whatsapp__stage-row:nth-child(even) .whatsapp__stage-panel {
+    justify-self: center;
+    width: 100%;
+  }
+
+  .whatsapp__stage-num {
+    top: -1.1rem;
+  }
+
+  .whatsapp__flow {
+    display: none;
+  }
+
+  .whatsapp__complete-steps {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .whatsapp__step {
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whatsapp__stage-bubble,
+  .whatsapp__stage-panel,
+  .whatsapp__complete,
+  .whatsapp__step {
+    transition: none;
+  }
+}

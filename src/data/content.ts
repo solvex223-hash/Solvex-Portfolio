@@ -171,4 +171,45 @@ export const content = {
       fallback: 'This demonstration only answers a few scripted sample questions. Try one of the suggestions below.',
     },
   },
+
+  // 09 — WHATSAPP AUTOMATION (demo)
+  whatsapp: {
+    label: '09 — DEMO',
+    category: 'Business Process Automation',
+    name: 'WHATSAPP AUTOMATION',
+    headline: 'EVERY CONVERSATION. A SMARTER SYSTEM.',
+    subheadline: 'AUTOMATED RESPONSE. LEAD CAPTURE. ORGANIZED WORKFLOW.',
+    description:
+      'Turn customer conversations into organized business workflows. From the first enquiry to lead capture and follow-up, automation helps businesses respond faster and manage customer interactions more efficiently.',
+    demo: {
+      title: 'WHATSAPP AUTOMATION',
+      chip: 'ILLUSTRATIVE DEMO',
+      note: 'Scripted demonstration · not a live WhatsApp integration',
+      tag: 'Demo message',
+      placeholder: 'Click a sample enquiry to see the workflow',
+      send: 'Send',
+      greeting:
+        'This demo shows how a WhatsApp business automation workflow works. Click a sample enquiry to see the automated response, lead capture, and follow-up in action.',
+      suggestions: [
+        'Hello, I\'m interested in your services',
+        'Can I get pricing information?',
+        'I\'d like to book a consultation',
+      ],
+      replies: [
+        {
+          match: ['interested', 'service', 'help', 'information', 'hello', 'hi', 'hey'],
+          text: 'Hello! Welcome. Thank you for reaching out. How can we help you today?',
+        },
+        {
+          match: ['pricing', 'price', 'cost', 'quote', 'budget'],
+          text: 'We offer flexible plans tailored to your needs. A specialist will share details shortly.',
+        },
+        {
+          match: ['book', 'consultation', 'appointment', 'schedule', 'meeting', 'call'],
+          text: 'We can schedule a brief call. What time works best for you?',
+        },
+      ],
+      fallback: 'This demo responds to a few sample enquiries. Try one of the suggestions.',
+    },
+  },
 };

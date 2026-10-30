@@ -11,8 +11,9 @@ const range = (v: number, a: number, b: number) => smooth(clamp((v - a) / (b - a
  *  p 0.28-0.48    supporting headline, then the description
  *  p 0.48-0.58    hold: the concept is understood
  *  p 0.58-0.78    the text lifts and shrinks, the workflow visual rises in
- *  p 0.62-0.90    stages appear sequentially: enquiry -> response -> lead -> follow-up -> complete
- *  p 0.95-1.00    gentle release towards the next section
+ *  p 0.62-0.85    stages appear sequentially: enquiry -> response -> follow-up
+ *  p 0.85-0.95    complete workflow appears
+ *  p 0.90-1.00    everything fades out towards the next section
  *
  * Returns the particle stages while WhatsApp is on screen.
  */
@@ -65,7 +66,7 @@ export function createWhatsAppScroll(section: HTMLElement, previous: () => HTMLE
     update(y: number): { calm?: number; service?: number } {
       const c = (y - (secTop - vh)) / vh; // viewports scrolled since section began to enter
       const p = clamp((y - secTop) / Math.max(1, height - vh));
-      const end = range(p, 0.95, 1.0);
+      const end = range(p, 0.9, 1.0); // fade out starts at 0.9
 
       // 1. the previous section recedes
       const prev = previous();
@@ -75,61 +76,59 @@ export function createWhatsAppScroll(section: HTMLElement, previous: () => HTMLE
         t(prev, `translate3d(0, ${(-k * 5).toFixed(2)}vh, 0) scale(${(1 - 0.06 * k).toFixed(4)})`);
       }
 
-      // 2. label
-      const lab = range(c, 0.55, 0.95);
+      // 2. label - fades in, then out at end
+      const lab = range(c, 0.55, 0.95) * (1 - end * 0.8);
       top.style.opacity = lab.toFixed(3);
       t(top, `translate3d(0, ${((1 - lab) * 14).toFixed(1)}px, 0)`);
 
-      // 3. the name WHATSAPP AUTOMATION, then it recedes into a watermark
+      // 3. the name WHATSAPP AUTOMATION, then it recedes into a watermark, then fades out
       const nm = range(p, 0.02, 0.14);
       const rec = range(p, 0.2, 0.34);
       markLine.style.transform = reduced ? '' : `translate3d(0, ${((1 - nm) * 112).toFixed(1)}%, 0)`;
-      mark.style.opacity = (nm * (1 - 0.8 * rec)).toFixed(3);
+      mark.style.opacity = (nm * (1 - 0.8 * rec) * (1 - end)).toFixed(3);
       mark.style.letterSpacing = reduced ? '' : `${(-0.01 - 0.03 * nm).toFixed(4)}em`;
       t(mark, `translate3d(0, ${(-rec * 5).toFixed(2)}vh, 0) scale(${(1 - 0.22 * rec).toFixed(4)})`);
 
-      // 4. "EVERY CONVERSATION..." becomes the anchor
+      // 4. "EVERY CONVERSATION..." becomes the anchor, then fades out
       const ti = range(p, 0.2, 0.32);
       titleLine.style.transform = reduced ? '' : `translate3d(0, ${((1 - ti) * 112).toFixed(1)}%, 0)`;
-      titleEl.style.opacity = (reduced ? ti : Math.min(1, ti * 3)).toFixed(3);
+      titleEl.style.opacity = ((reduced ? ti : Math.min(1, ti * 3)) * (1 - end)).toFixed(3);
       if (!reduced) titleEl.style.letterSpacing = `${(-0.012 - 0.03 * ti).toFixed(4)}em`;
 
-      // 5. supporting headline, then the description
+      // 5. supporting headline, then the description - both fade out at end
       const sb = range(p, 0.28, 0.4);
-      sub.style.opacity = sb.toFixed(3);
+      sub.style.opacity = (sb * (1 - end)).toFixed(3);
       t(sub, `translate3d(0, ${((1 - sb) * 18).toFixed(1)}px, 0)`);
-      const ds = range(p, 0.36, 0.48) * (1 - range(p, 0.56, 0.64));
+      const ds = range(p, 0.36, 0.48) * (1 - range(p, 0.56, 0.64)) * (1 - end);
       desc.style.opacity = ds.toFixed(3);
       t(desc, `translate3d(0, ${((1 - range(p, 0.36, 0.48)) * 18).toFixed(1)}px, 0)`);
 
       // 6. the text lifts and shrinks; the workflow visual rises in
       const up = range(p, 0.58, 0.74);
       t(copy, `translate3d(0, ${(-up * shiftVh).toFixed(2)}vh, 0) scale(${(1 - 0.38 * up).toFixed(4)})`);
-      const vn = range(p, 0.62, 0.78);
+      const vn = range(p, 0.62, 0.78) * (1 - end * 0.5); // visual starts fading at end
       visual.style.opacity = vn.toFixed(3);
       t(visual, `translate3d(0, ${((1 - vn) * 9).toFixed(2)}vh, 0)`);
       visual.style.visibility = vn > 0.01 ? 'visible' : 'hidden';
       visual.style.pointerEvents = vn > 0.6 ? 'auto' : 'none';
 
-      // 7. stages appear sequentially
-      const stageProgress = range(p, 0.62, 0.9);
-      const stageCount = bubbles.length;
+      // 7. stages appear sequentially (3 stages now)
       bubbles.forEach((_, i) => {
-        const stageStart = 0.62 + (i / stageCount) * 0.28;
-        const stageEnd = stageStart + 0.28 / stageCount * 1.2;
+        const stageStart = 0.62 + (i / 3) * 0.23;
+        const stageEnd = stageStart + 0.23 / 3 * 1.2;
         const sp = range(p, stageStart, stageEnd);
         showStage(i, sp);
       });
 
-      // 8. complete workflow view
-      const cp = range(p, 0.8, 0.95);
+      // 8. complete workflow view - fades out at end
+      const cp = range(p, 0.85, 0.95) * (1 - end);
       if (complete) {
         complete.style.opacity = cp.toFixed(3);
         t(complete, `translate3d(0, ${((1 - cp) * 12).toFixed(2)}vh, 0)`);
       }
 
-      // 9. release towards the next section
-      stage.style.opacity = (1 - 0.35 * end).toFixed(3);
+      // 9. fade out entire stage towards the next section
+      stage.style.opacity = (1 - end).toFixed(3);
 
       if (c <= 0) return {};
 

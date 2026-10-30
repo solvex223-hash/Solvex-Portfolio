@@ -52,10 +52,6 @@ export function mountWhatsApp(parent: HTMLElement = document.body, reduced = fal
             </div>
             <div class="whatsapp__panel-body">
               <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Name</span>
-                <span class="whatsapp__panel-value">—</span>
-              </div>
-              <div class="whatsapp__panel-row">
                 <span class="whatsapp__panel-label">Source</span>
                 <span class="whatsapp__panel-value">WhatsApp Enquiry</span>
               </div>
@@ -74,7 +70,7 @@ export function mountWhatsApp(parent: HTMLElement = document.body, reduced = fal
           </div>
         </div>
 
-        <!-- Stage 2: Automated Response -->
+        <!-- Stage 2: Automated Response + Lead Capture -->
         <div class="whatsapp__stage-row" data-stage="2">
           <div class="whatsapp__stage-bubble">
             Hello! Welcome. Thank you for reaching out. How can we help you today?
@@ -87,129 +83,20 @@ export function mountWhatsApp(parent: HTMLElement = document.body, reduced = fal
           <div class="whatsapp__stage-panel whatsapp__lead-panel">
             <div class="whatsapp__panel-header">
               <span class="whatsapp__panel-dot" aria-hidden="true"></span>
-              <span class="whatsapp__panel-title">Auto-Response Sent</span>
+              <span class="whatsapp__panel-title">Auto-Response & Lead Enriched</span>
             </div>
             <div class="whatsapp__panel-body">
-              <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Trigger</span>
-                <span class="whatsapp__panel-value">New Message Received</span>
-              </div>
-              <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Template</span>
-                <span class="whatsapp__panel-value">Welcome & Assist</span>
-              </div>
               <div class="whatsapp__panel-row">
                 <span class="whatsapp__panel-label">Response Time</span>
                 <span class="whatsapp__panel-value">< 1 Second</span>
               </div>
               <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Status</span>
-                <span class="whatsapp__status whatsapp__status--active">
-                  <span class="whatsapp__status-dot" aria-hidden="true"></span>
-                  Delivered
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Stage 3: Lead Capture -->
-        <div class="whatsapp__stage-row" data-stage="3">
-          <div class="whatsapp__stage-bubble">
-            I'd like to book a consultation for next week.
-          </div>
-          <span class="whatsapp__stage-num" aria-hidden="true">3</span>
-          <div class="whatsapp__stage-panel whatsapp__lead-panel">
-            <div class="whatsapp__panel-header">
-              <span class="whatsapp__panel-dot" aria-hidden="true"></span>
-              <span class="whatsapp__panel-title">Lead Enriched</span>
-            </div>
-            <div class="whatsapp__panel-body">
-              <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Name</span>
-                <span class="whatsapp__panel-value">Demo Customer</span>
+                <span class="whatsapp__panel-label">Lead</span>
+                <span class="whatsapp__panel-value">Demo Customer · Qualified</span>
               </div>
               <div class="whatsapp__panel-row">
                 <span class="whatsapp__panel-label">Intent</span>
                 <span class="whatsapp__panel-value">Book Consultation</span>
-              </div>
-              <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Preferred Time</span>
-                <span class="whatsapp__panel-value">Next Week</span>
-              </div>
-              <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Status</span>
-                <span class="whatsapp__status whatsapp__status--active">
-                  <span class="whatsapp__status-dot" aria-hidden="true"></span>
-                  Qualified Lead
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Stage 4: Follow-up -->
-        <div class="whatsapp__stage-row" data-stage="4">
-          <div class="whatsapp__stage-bubble">
-            Perfect! We've scheduled your consultation for Tuesday at 10 AM. You'll receive a confirmation shortly.
-            <span class="whatsapp__auto-indicator" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6v6l4 2"/></svg>
-              Automated
-            </span>
-          </div>
-          <span class="whatsapp__stage-num" aria-hidden="true">4</span>
-          <div class="whatsapp__stage-panel whatsapp__lead-panel">
-            <div class="whatsapp__panel-header">
-              <span class="whatsapp__panel-dot" aria-hidden="true"></span>
-              <span class="whatsapp__panel-title">Follow-up Scheduled</span>
-            </div>
-            <div class="whatsapp__panel-body">
-              <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Action</span>
-                <span class="whatsapp__panel-value">Confirmation Sent</span>
-              </div>
-              <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Appointment</span>
-                <span class="whatsapp__panel-value">Tuesday, 10:00 AM</span>
-              </div>
-              <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Reminder</span>
-                <span class="whatsapp__panel-value">24h Before</span>
-              </div>
-              <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Status</span>
-                <span class="whatsapp__status whatsapp__status--active">
-                  <span class="whatsapp__status-dot" aria-hidden="true"></span>
-                  Confirmed
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Stage 5: Organized Workflow -->
-        <div class="whatsapp__stage-row" data-stage="5">
-          <div class="whatsapp__stage-bubble">
-            Your enquiry is now tracked in our workflow. Our team will prepare for the consultation.
-          </div>
-          <span class="whatsapp__stage-num" aria-hidden="true">5</span>
-          <div class="whatsapp__stage-panel whatsapp__lead-panel">
-            <div class="whatsapp__panel-header">
-              <span class="whatsapp__panel-dot" aria-hidden="true"></span>
-              <span class="whatsapp__panel-title">Workflow Updated</span>
-            </div>
-            <div class="whatsapp__panel-body">
-              <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Stage</span>
-                <span class="whatsapp__panel-value">Consultation Scheduled</span>
-              </div>
-              <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Assigned To</span>
-                <span class="whatsapp__panel-value">Solutions Team</span>
-              </div>
-              <div class="whatsapp__panel-row">
-                <span class="whatsapp__panel-label">Next Action</span>
-                <span class="whatsapp__panel-value">Pre-Call Prep</span>
               </div>
               <div class="whatsapp__panel-row">
                 <span class="whatsapp__panel-label">Status</span>
@@ -222,13 +109,52 @@ export function mountWhatsApp(parent: HTMLElement = document.body, reduced = fal
           </div>
         </div>
 
+        <!-- Stage 3: Follow-up + Organized Workflow -->
+        <div class="whatsapp__stage-row" data-stage="3">
+          <div class="whatsapp__stage-bubble">
+            Perfect! We've scheduled your consultation. You'll receive a confirmation shortly.
+            <span class="whatsapp__auto-indicator" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6v6l4 2"/></svg>
+              Automated
+            </span>
+          </div>
+          <span class="whatsapp__stage-num" aria-hidden="true">3</span>
+          <div class="whatsapp__stage-panel whatsapp__lead-panel">
+            <div class="whatsapp__panel-header">
+              <span class="whatsapp__panel-dot" aria-hidden="true"></span>
+              <span class="whatsapp__panel-title">Follow-up & Workflow</span>
+            </div>
+            <div class="whatsapp__panel-body">
+              <div class="whatsapp__panel-row">
+                <span class="whatsapp__panel-label">Action</span>
+                <span class="whatsapp__panel-value">Confirmation Sent · Reminder Set</span>
+              </div>
+              <div class="whatsapp__panel-row">
+                <span class="whatsapp__panel-label">Appointment</span>
+                <span class="whatsapp__panel-value">Tuesday, 10:00 AM</span>
+              </div>
+              <div class="whatsapp__panel-row">
+                <span class="whatsapp__panel-label">Stage</span>
+                <span class="whatsapp__panel-value">Consultation Scheduled</span>
+              </div>
+              <div class="whatsapp__panel-row">
+                <span class="whatsapp__panel-label">Status</span>
+                <span class="whatsapp__status whatsapp__status--active">
+                  <span class="whatsapp__status-dot" aria-hidden="true"></span>
+                  Confirmed
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Complete workflow summary -->
         <div class="whatsapp__complete">
           <h3 class="whatsapp__complete-title">Complete Automated Workflow</h3>
           <div class="whatsapp__complete-steps">
-            <div class="whatsapp__step whatsapp__workflow-step is-active" data-step="1">
+            <div class="whatsapp__step whatsapp__workflow-step" data-step="1">
               <span class="whatsapp__step-num">1</span>
-              <span>Customer Enquiry</span>
+              <span>Enquiry</span>
             </div>
             <div class="whatsapp__step whatsapp__workflow-step" data-step="2">
               <span class="whatsapp__step-num">2</span>
@@ -244,7 +170,7 @@ export function mountWhatsApp(parent: HTMLElement = document.body, reduced = fal
             </div>
             <div class="whatsapp__step whatsapp__workflow-step" data-step="5">
               <span class="whatsapp__step-num">5</span>
-              <span>Organized Workflow</span>
+              <span>Workflow</span>
             </div>
           </div>
         </div>

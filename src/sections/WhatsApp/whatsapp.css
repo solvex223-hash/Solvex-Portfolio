@@ -5,8 +5,8 @@
 .whatsapp {
   position: relative;
   z-index: 1;
-  height: 520vh;
-  height: 520svh;
+  height: 380vh;
+  height: 380svh;
 }
 
 .whatsapp__stage {

@@ -1,0 +1,330 @@
+/* 08 — ARIA (internal product / demo)
+   A quiet product reveal: giant name, one headline, one description, then a scripted demo interface.
+   JS (ariaScroll.ts) sets opacity / transform from the scroll position. */
+
+.aria {
+  position: relative;
+  z-index: 1;
+  height: 520vh;
+  height: 520svh;
+}
+
+.aria__stage {
+  position: sticky;
+  top: 0;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  height: 100svh;
+  padding: 0 var(--pad);
+  text-align: center;
+}
+
+/* soft dark pool behind the centred text, over the particle core */
+.aria__stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(58% 54% at 50% 50%, rgba(var(--bg-rgb), 0.55) 0%, rgba(var(--bg-rgb), 0.28) 60%, transparent 100%);
+}
+
+.aria__top {
+  position: absolute;
+  top: clamp(4.2rem, 11vh, 6.5rem);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  opacity: 0;
+}
+
+.aria__label {
+  color: var(--fg-soft);
+}
+
+.aria__cat {
+  color: var(--muted);
+}
+
+/* the name: huge, silver, fades towards its base */
+.aria__mark {
+  grid-area: 1 / 1;
+  opacity: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(6rem, min(26vw, 42vh), 25rem);
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  will-change: opacity, transform;
+}
+
+.aria__mark .line-inner {
+  background: linear-gradient(180deg, var(--fg) 15%, rgba(244, 244, 242, 0.3) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.aria__copy {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.8rem, 2.2vh, 1.5rem);
+  max-width: min(92vw, 62rem);
+  transform-origin: 50% 0;
+  will-change: transform;
+}
+
+.aria__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(3rem, min(11vw, 18vh), 10rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--fg);
+  opacity: 0;
+  text-shadow: 0 2px 30px rgba(var(--bg-rgb), 0.9);
+}
+
+.aria__sub {
+  margin: 0;
+  max-width: 24ch;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: calc(var(--h-size) * 0.62);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--fg);
+  opacity: 0;
+  text-shadow: 0 2px 24px rgba(var(--bg-rgb), 0.95);
+}
+
+.aria__desc {
+  max-width: 38rem;
+  opacity: 0;
+  text-shadow: 0 1px 18px rgba(var(--bg-rgb), 0.95);
+}
+
+/* ---------- the demo interface ---------- */
+.aria__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(1.4rem, 6vh, 3.6rem);
+  margin-inline: auto;
+  width: min(92vw, 40rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 1rem 1.1rem 0.9rem;
+  border: 1px solid rgba(244, 244, 242, 0.14);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(20, 19, 44, 0.94), rgba(11, 10, 30, 0.94));
+  box-shadow:
+    0 30px 90px -30px rgba(0, 0, 0, 0.85),
+    0 0 80px -48px rgba(139, 108, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+.aria__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.aria__dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 14px 2px rgba(139, 108, 255, 0.55);
+}
+
+.aria__name {
+  color: var(--fg);
+}
+
+.aria__status {
+  margin-left: auto;
+  padding: 0.4em 0.9em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: var(--fg-soft);
+}
+
+.aria__log {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  min-height: 7rem;
+  max-height: clamp(9rem, 30svh, 15rem);
+  overflow: hidden; /* never a scroll container: page scrolling stays free */
+}
+
+.aria__msg {
+  max-width: 88%;
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--fg);
+}
+
+.aria__msg p {
+  margin: 0;
+}
+
+.aria__msg--user {
+  align-self: flex-end;
+  background: rgba(139, 108, 255, 0.18);
+  border: 1px solid rgba(139, 108, 255, 0.3);
+}
+
+.aria__msg--aria {
+  align-self: flex-start;
+  background: rgba(244, 244, 242, 0.05);
+  border: 1px solid var(--line);
+}
+
+.aria__tag {
+  display: block;
+  margin-top: 0.45rem;
+  font-size: 0.58rem;
+  color: var(--muted);
+}
+
+.aria__msg.is-typing p::after {
+  content: '···';
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.aria__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.aria__chip {
+  padding: 0.5em 1em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--fg-soft);
+  cursor: pointer;
+  transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+}
+
+.aria__chip:hover,
+.aria__chip:focus-visible {
+  border-color: rgba(139, 108, 255, 0.6);
+  color: var(--fg);
+  background: rgba(139, 108, 255, 0.1);
+  outline: none;
+}
+
+.aria__form {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.aria__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  font-family: var(--font-body);
+  font-size: 16px; /* 16px stops iOS from zooming the page when the field is focused */
+  color: var(--fg);
+}
+
+.aria__input::placeholder {
+  color: var(--muted);
+}
+
+.aria__input:focus {
+  outline: none;
+  border-color: rgba(139, 108, 255, 0.6);
+}
+
+.aria__send {
+  padding: 0 1.3rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--fg);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #050505;
+  cursor: pointer;
+}
+
+.aria__note {
+  margin: 0;
+  font-size: 0.58rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* ---------- phones / portrait ---------- */
+@media (max-aspect-ratio: 1/1) {
+  .aria__stage::before {
+    background: radial-gradient(95% 50% at 50% 46%, rgba(var(--bg-rgb), 0.6) 0%, rgba(var(--bg-rgb), 0.3) 62%, transparent 100%);
+  }
+
+  .aria__mark {
+    font-size: clamp(5rem, 34vw, 14rem);
+  }
+
+  .aria__title {
+    font-size: clamp(2.8rem, 15vw, 7rem);
+  }
+
+  .aria__sub {
+    font-size: calc(var(--h-size) * 0.8);
+    max-width: 20ch;
+  }
+
+  .aria__panel {
+    bottom: 1rem;
+    padding: 0.85rem 0.9rem 0.75rem;
+  }
+
+  .aria__log {
+    min-height: 5.5rem;
+    max-height: 24svh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aria__chip {
+    transition: none;
+  }
+}

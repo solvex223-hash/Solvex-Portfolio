@@ -102,6 +102,7 @@ export function mountProject(parent: HTMLElement, project: Project, reduced: boo
         : `perspective(1600px) translate3d(0, ${((1 - v) * 16).toFixed(2)}vh, 0) rotateX(${((1 - v) * 14).toFixed(2)}deg) rotateY(${(-4 * v).toFixed(2)}deg) scale(${(0.9 + 0.1 * v).toFixed(4)})`;
       const s = range(p, 0.4, 0.95);
       visual.page.style.transform = `translate3d(0, ${(-s * shiftMax).toFixed(1)}px, 0)`;
+      visual.setProgress(s); // a live site that supports it scrolls itself
 
       // 4. the description arrives once title and status have been read
       const d = range(p, 0.3, 0.5);

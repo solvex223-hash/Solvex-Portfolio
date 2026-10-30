@@ -129,4 +129,46 @@ export const content = {
     heading: ['SELECTED', 'WORK.'],
     lead: 'Explore selected projects, internal products, demonstrations and concepts created by SolveX.',
   },
+
+  // 08 — ARIA (internal product / demo)
+  aria: {
+    label: '08 — INTERNAL PRODUCT / DEMO',
+    category: 'AI Assistant',
+    name: 'ARIA',
+    headline: 'MEET ARIA.',
+    subheadline: 'A MORE INTELLIGENT WAY TO INTERACT WITH TECHNOLOGY.',
+    description:
+      'ARIA is a SolveX internal AI assistant concept exploring how intelligent interfaces can make information, assistance and digital workflows more accessible.',
+    demo: {
+      title: 'ARIA',
+      chip: 'ILLUSTRATIVE DEMO',
+      note: 'Scripted demonstration · not a live AI model',
+      tag: 'Illustrative response',
+      placeholder: 'Ask a sample question',
+      send: 'Send',
+      greeting:
+        'Hello. This is an illustrative demo of the ARIA concept. Responses are scripted, so try one of the sample questions.',
+      suggestions: ['What is ARIA?', 'Is ARIA available?', 'What can ARIA do?'],
+      // Honest, scripted answers only. Nothing here claims a capability that has not been built and verified.
+      replies: [
+        {
+          match: ['what is aria', 'what is this', 'who are you', 'what are you', 'about aria', 'tell me about'],
+          text: 'ARIA is a SolveX internal AI assistant concept exploring how intelligent interfaces can make information, assistance and digital workflows more accessible.',
+        },
+        {
+          match: ['available', 'launch', 'live', 'public', 'deploy', 'customer', 'release', 'buy', 'price', 'pricing'],
+          text: 'ARIA is an internal concept and demo. It has not been publicly launched or deployed to any business.',
+        },
+        {
+          match: ['can aria', 'what can', 'do you', 'can you', 'feature', 'capabilit', 'help', 'function'],
+          text: 'In this demonstration I only show how a conversation could look. I answer a small set of scripted questions, and I am not connected to a live AI model or to any business systems.',
+        },
+        {
+          match: ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'],
+          text: 'Hello. This is an illustrative demo of the ARIA concept. Try one of the sample questions.',
+        },
+      ],
+      fallback: 'This demonstration only answers a few scripted sample questions. Try one of the suggestions below.',
+    },
+  },
 };

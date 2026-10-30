@@ -136,6 +136,11 @@ export class ShapeBank {
     const idle = () => new Promise((r) => (window.requestIdleCallback ? window.requestIdleCallback(() => r()) : setTimeout(r, 60)));
     for (let s = 0; s < SHAPE_COUNT && !this.disposed; s++) {
       try {
+        if (SHAPES[s].procedural) {
+          this.build(s); // generated objects (e.g. the ARIA core) have no photo
+          await idle();
+          continue;
+        }
         this.buildImage(s, await loadImageData(imageUrl(s)));
       } catch (err) {
         console.warn(`[shapes] photo ${imageUrl(s)} unavailable, using the generated object`, err);

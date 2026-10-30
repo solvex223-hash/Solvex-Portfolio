@@ -13,9 +13,14 @@ export interface ProjectVisual {
    * appears in the portfolio automatically. Falls back to the screenshot / representative layout when it
    * cannot load (blocked embedding, offline, phones, data-saver).
    *  - width:  the desktop width the site is rendered at (it is scaled down to fit the window)
-   *  - height: how much of the top of the page is shown and scrolled through
+   *  The site is shown in a window with the SAME proportions as the portfolio's browser window, so 100vh
+   *  sections lay out exactly as they do in a real browser. (An old `height` option made the site render in a
+   *  4800px-tall window, which turned every 100vh hero into a tall empty block: it is no longer used.)
+   *
+   *  To make the embedded site scroll with the portfolio, add the small snippet from
+   *  intercloud-embed-snippet.html to the Intercloud site. Without it the top of the site is shown, still.
    */
-  live?: { url: string; width: number; height: number };
+  live?: { url: string; width: number; height?: number };
 }
 
 export interface Project {
@@ -44,7 +49,7 @@ export const projects: Project[] = [
     visual: {
       kind: 'browser',
       screenshots: ['/images/intercloud/Screenshot (723).png'],
-      live: { url: 'https://intercloud.vercel.app/', width: 1440, height: 4800 },
+      live: { url: 'https://intercloud.vercel.app/', width: 1440 },
     },
   },
 ];

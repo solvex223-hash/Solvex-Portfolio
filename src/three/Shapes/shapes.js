@@ -1,7 +1,7 @@
 import { seeded } from '../math.js';
 import {
   sphere, box, cylY, torusXZ, capsule, tube, coneShell, coneSolid, hexY, slab,
-  c2, b2, u2, s2, move, rotX, rotZ, between, union, intersect,
+  c2, b2, u2, s2, move, rotX, rotY, rotZ, between, union, intersect,
 } from './sdf.js';
 import { sampleHead, eyePositions } from './headShape.js';
 
@@ -277,6 +277,27 @@ function system() {
   return { view: { yaw: -0.3, pitch: 0.2, scale: 1.0, dx: 0, dy: 0 }, parts };
 }
 
+// ---------- 12. ARIA: a minimal intelligence core (rings of orbit around a luminous centre) ----------
+function ariaCore() {
+  const ring = (R, r) => rotX(torusXZ(R, r), PI / 2); // faces the viewer
+  const tilt = (R, r, ay, az = 0) => rotZ(rotY(ring(R, r), ay), az);
+  const parts = [
+    { o: sphere(0.5), share: 20, accent: true }, // the core
+    { o: ring(2.95, 0.022), share: 15 },
+    { o: tilt(2.45, 0.02, 1.0), share: 13 },
+    { o: tilt(2.45, 0.02, -1.0), share: 13 },
+    { o: tilt(1.95, 0.018, 1.25, 0.5), share: 9 },
+    { o: tilt(1.95, 0.018, -1.25, -0.5), share: 9 },
+    { o: ring(1.2, 0.016), share: 6 },
+    { o: sphere(1.22), share: 4 }, // faint outer shell
+  ];
+  // small bright nodes riding the rings
+  [[2.95, 0.6], [2.95, 3.4], [2.45, 1.9], [1.95, 4.4], [1.2, 2.5]].forEach(([R, a]) => {
+    parts.push({ o: move(sphere(0.085), R * Math.cos(a), R * Math.sin(a), 0), share: 1.2, accent: true });
+  });
+  return { view: { yaw: 0.0, pitch: 0.12, scale: 1.0, dx: 0, dy: 0 }, parts };
+}
+
 export const SHAPES = [
   { name: 'AI AUTOMATION', make: robotArm },
   { name: 'AI AGENTS', make: aiHead },
@@ -289,6 +310,8 @@ export const SHAPES = [
   { name: 'BRANDING & CREATIVE DESIGN', make: pencil },
   { name: 'CUSTOM DIGITAL SOLUTIONS', make: puzzle },
   { name: 'CONNECTED BUSINESS SYSTEMS', make: system },
+  // procedural only: no photo (used by the ARIA section)
+  { name: 'ARIA INTELLIGENCE CORE', make: ariaCore, procedural: true },
 ];
 
 // ---------- sampling ----------

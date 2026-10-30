@@ -5,7 +5,7 @@ import { Globe } from '../../three/Globe/Globe.js';
 import { GlobeTags } from '../../three/Globe/GlobeTags.js';
 import { SystemParticles } from '../../three/Particles/SystemParticles.js';
 import { TeamPhoto } from '../../three/Hologram/TeamPhoto.js';
-import { ShapeBank } from '../../three/Shapes/ShapeBank.js';
+import { ShapeBank, SHAPE_COUNT } from '../../three/Shapes/ShapeBank.js';
 import { ServicePhotos } from '../../three/Shapes/ServicePhotos.js';
 import { loadTeamPhoto } from '../../three/Hologram/sampleImage.js';
 import { CameraRig, ABOUT_DISTANCE } from '../../three/Camera/CameraRig.js';
@@ -244,7 +244,7 @@ export async function createThreeScene(mount, { reduced = false } = {}) {
       if (s.form !== undefined) target.form = clamp(s.form, 0, 1);
       if (s.dissolve !== undefined) target.dissolve = clamp(s.dissolve, 0, 1);
       if (s.connect !== undefined) target.connect = clamp(s.connect, 0, 1);
-      if (s.service !== undefined) target.service = clamp(s.service, 0, 10);
+      if (s.service !== undefined) target.service = clamp(s.service, 0, SHAPE_COUNT - 1);
       if (s.settle !== undefined) target.settle = clamp(s.settle, 0, 1);
       if (s.calm !== undefined) target.calm = clamp(s.calm, 0, 1);
     },

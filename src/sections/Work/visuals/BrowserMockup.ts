@@ -48,103 +48,130 @@ function loadFirst(urls: string[]): Promise<string | null> {
 export interface LiveOptions {
   url: string;
   width: number;
-  height: number;
+  height?: number; // ignored: see data/projects.ts
 }
 
 /**
  * Shows the real website, scaled down to the window width, inside `page` (so the existing scroll logic slides it
- * like it does a screenshot). Starts loading immediately on mount. On data-saver falls back to screenshot/wireframe.
- * If the iframe cannot load (CSP, network error, blank), it gracefully falls back.
+ * like it does a screenshot). The iframe is created only when the card is about to be seen, ignores the pointer
+ * (page scrolling is never captured) and is skipped on phones / data-saver. If it cannot load, nothing changes.
  */
-function mountLive(el: HTMLElement, page: HTMLElement, viewport: HTMLElement, name: string, live: LiveOptions) {
+function mountLive(
+  el: HTMLElement,
+  page: HTMLElement,
+  viewport: HTMLElement,
+  name: string,
+  live: LiveOptions,
+  visual: BrowserVisual
+) {
   const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
-  const isDataSaver = nav.connection?.saveData;
-  if (isDataSaver) return; // skip live preview on data-saver, keep wireframe/screenshot
+  if (window.matchMedia('(max-width: 720px)').matches || nav.connection?.saveData) return;
 
-  const isMobile = window.matchMedia('(max-width: 720px)').matches;
-  const fallbackTimeout = isMobile ? 6000 : 10000;
+  let started = false;
+  const start = () => {
+    if (started) return;
+    started = true;
 
-  // Start immediately - no IntersectionObserver delay
-  const holder = document.createElement('div');
-  holder.className = 'browser__live';
-  const frame = document.createElement('iframe');
-  frame.src = live.url;
-  frame.title = `${name} website (live preview)`;
-  frame.width = String(live.width);
-  frame.height = String(live.height);
-  frame.tabIndex = -1;
-  frame.setAttribute('aria-hidden', 'true');
-  // allow-scripts + allow-same-origin: needed for cross-origin iframe to render content
-  // allow-top-navigation: lets site redirect if needed
-  frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-top-navigation');
-  frame.referrerPolicy = 'no-referrer';
-  holder.appendChild(frame);
+    const holder = document.createElement('div');
+    holder.className = 'browser__live';
+    const frame = document.createElement('iframe');
+    frame.src = live.url;
+    frame.title = `${name} website (live preview)`;
+    frame.width = String(live.width);
+    frame.tabIndex = -1;
+    frame.setAttribute('aria-hidden', 'true');
+    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    frame.referrerPolicy = 'no-referrer';
+    holder.appendChild(frame);
 
-  const fit = () => {
-    const s = viewport.clientWidth / live.width;
-    frame.style.transform = `scale(${s})`;
-    frame.style.transformOrigin = '0 0';
-    const scaledHeight = live.height * s;
-    holder.style.height = `${scaledHeight}px`;
-    holder.style.width = `${live.width * s}px`;
-    page.style.height = `${scaledHeight}px`;
-  };
-  const ro = new ResizeObserver(() => {
-    fit();
-    el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
-  });
+    // The site is rendered in a window with the same proportions as the portfolio's browser window. Its
+    // viewport height (what `100vh` means inside the site) is therefore a normal screen height, not thousands
+    // of pixels: heroes, centred content and reveal animations all behave like in a real browser.
+    const fit = () => {
+      const vw = viewport.clientWidth || 1;
+      const vh = viewport.clientHeight || 1;
+      const s = vw / live.width;
+      const innerH = Math.ceil(live.width * (vh / vw));
+      frame.height = String(innerH);
+      frame.style.height = `${innerH}px`;
+      frame.style.transform = `scale(${s})`;
+      holder.style.height = `${vh}px`;
+      page.style.height = `${vh}px`;
+    };
+    const ro = new ResizeObserver(() => {
+      fit();
+      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true })); // re-measure the scroll distance
+    });
 
-  let revealed = false;
-  let hasContent = false;
+    // 'load' only fires after every photo and video of the site has downloaded, which can take a long time on a
+    // heavy page. So the preview is shown on 'load' OR after a short delay, whichever comes first, and is never
+    // thrown away for being slow.
+    let revealed = false;
+    const reveal = () => {
+      if (revealed) return;
+      revealed = true;
+      Array.from(page.children).forEach((c) => c !== holder && c.remove());
+      el.classList.remove('is-representative');
+      el.classList.add('is-live');
+      holder.classList.remove('is-loading');
+      fit();
+      ro.observe(viewport);
+      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
+    };
+    frame.addEventListener('load', reveal);
+    window.setTimeout(reveal, 3500);
 
-  const tryReveal = () => {
-    if (revealed) return;
-    // Only reveal if iframe actually has content (not blocked by CSP)
-    if (!hasContent) {
-      try {
-        const doc = frame.contentDocument || frame.contentWindow?.document;
-        hasContent = !!(doc && doc.body && (doc.body.innerHTML.trim() || doc.querySelector('body *')));
-      } catch {
-        hasContent = false; // cross-origin blocked = no content
-      }
+    // Optional scroll link: if the site contains the embed snippet it announces itself, and the portfolio then
+    // tells it how far through the page to be (0..1). Origin and window are both checked.
+    let origin = '';
+    try {
+      origin = new URL(live.url).origin;
+    } catch {
+      origin = '';
     }
-    if (!hasContent) return;
+    let ready = false;
+    let last = -1;
+    let want = 0;
+    const send = () => {
+      if (!ready || Math.abs(want - last) < 0.002) return;
+      last = want;
+      frame.contentWindow?.postMessage({ type: 'solvex-scroll', progress: want }, origin);
+    };
+    window.addEventListener('message', (e: MessageEvent) => {
+      if (e.origin !== origin || e.source !== frame.contentWindow) return;
+      const d = e.data as { source?: string; type?: string } | null;
+      if (d && d.source === 'solvex-embed' && d.type === 'ready') {
+        ready = true;
+        last = -1;
+        send();
+      }
+    });
+    visual.setProgress = (s: number) => {
+      want = Math.min(1, Math.max(0, s));
+      send();
+    };
 
-    revealed = true;
-    Array.from(page.children).forEach((c) => c !== holder && c.remove());
-    el.classList.remove('is-representative');
-    el.classList.add('is-live');
-    holder.classList.remove('is-loading');
+    page.style.position = 'relative';
+    holder.classList.add('is-loading'); // invisible until revealed, so nothing half-drawn is shown
+    page.appendChild(holder);
     fit();
-    ro.observe(viewport);
-    el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
   };
 
-  frame.addEventListener('load', () => {
-    console.log(`[BrowserMockup] iframe load event for ${name}`);
-    setTimeout(() => { hasContent = true; tryReveal(); }, 100);
-  });
-
-  frame.addEventListener('error', (e) => {
-    console.error(`[BrowserMockup] iframe error for ${name}:`, e);
-    fallback();
-  });
-
-  const fallback = () => {
-    if (revealed) return;
-    console.warn(`[BrowserMockup] Live preview fallback for ${name} (blocked/blank)`);
-    holder.remove();
-    el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
-  };
-  window.setTimeout(fallback, fallbackTimeout);
-
-  page.style.position = 'relative';
-  holder.classList.add('is-loading');
-  page.appendChild(holder);
-  fit();
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        io.disconnect();
+        start();
+      }
+    },
+    { rootMargin: '900px 0px' }
+  );
+  io.observe(el);
 }
 
 export interface BrowserVisual {
+  /** 0..1: how far through the website the window should be (only used when the site supports it) */
+  setProgress(s: number): void;
   el: HTMLElement;
   /** the scrolling page inside the window, and its viewport */
   page: HTMLElement;
@@ -168,59 +195,19 @@ export function createBrowserMockup(name: string, screenshots: string[], live?: 
   const page = el.querySelector<HTMLElement>('.browser__page')!;
   const viewport = el.querySelector<HTMLElement>('.browser__viewport')!;
 
-  // If we have a screenshot, load it IMMEDIATELY (not async) so wireframe never shows
-  if (screenshots.length > 0) {
-    const url = screenshots[0];
+  void loadFirst(screenshots).then((url) => {
+    if (!url) return; // keep the representative layout
     const img = new Image();
     img.src = url;
     img.alt = `${name} website`;
     img.decoding = 'async';
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'cover';
-    img.style.objectPosition = 'center top';
-    img.onload = () => {
-      page.replaceChildren(img);
-      el.classList.remove('is-representative');
-      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
-    };
-    img.onerror = () => {
-      // fallback to wireframe if image fails
-      void loadFirst(screenshots.slice(1)).then((fallbackUrl) => {
-        if (fallbackUrl) {
-          const fbImg = new Image();
-          fbImg.src = fallbackUrl;
-          fbImg.alt = `${name} website`;
-          fbImg.decoding = 'async';
-          fbImg.style.width = '100%';
-          fbImg.style.height = '100%';
-          fbImg.style.objectFit = 'cover';
-          fbImg.style.objectPosition = 'center top';
-          page.replaceChildren(fbImg);
-          el.classList.remove('is-representative');
-          el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
-        }
-      });
-    };
-  } else {
-    // No screenshots: try loadFirst for any fallback
-    void loadFirst(screenshots).then((url) => {
-      if (!url) return;
-      const img = new Image();
-      img.src = url;
-      img.alt = `${name} website`;
-      img.decoding = 'async';
-      img.style.width = '100%';
-      img.style.height = '100%';
-      img.style.objectFit = 'cover';
-      img.style.objectPosition = 'center top';
-      page.replaceChildren(img);
-      el.classList.remove('is-representative');
-      el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
-    });
-  }
+    page.replaceChildren(img);
+    el.classList.remove('is-representative'); // real screenshot: hide the tag
+    el.dispatchEvent(new CustomEvent('visual:loaded', { bubbles: true }));
+  });
 
-  if (live) mountLive(el, page, viewport, name, live);
+  const visual: BrowserVisual = { el, page, viewport, setProgress: () => {} };
+  if (live) mountLive(el, page, viewport, name, live, visual);
 
-  return { el, page, viewport };
+  return visual;
 }

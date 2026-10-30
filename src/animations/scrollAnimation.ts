@@ -8,6 +8,11 @@ interface WorkScroll {
   update(y: number): { calm: number };
 }
 
+interface AriaScroll {
+  measure(): void;
+  update(y: number): { calm?: number; service?: number };
+}
+
 gsap.registerPlugin(ScrollTrigger);
 
 interface StageTarget {
@@ -20,6 +25,7 @@ interface Sections {
   problem: HTMLElement;
   solutions: HTMLElement;
   work?: WorkScroll; // 06 — Selected Work
+  aria?: AriaScroll; // 08 — ARIA
 }
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v));
@@ -33,7 +39,7 @@ const range = (v: number, a: number, b: number) => smooth(clamp((v - a) / (b - a
 export function initScrollAnimation(sections: Sections, scene: StageTarget, reduced = false) {
   ScrollTrigger.config({ ignoreMobileResize: true });
 
-  const { hero, about, problem, solutions, work } = sections;
+  const { hero, about, problem, solutions, work, aria } = sections;
   const sol = createSolutionsScroll(solutions, reduced); // drives its own text; shares this scroll listener
   let heroH = 1;
   let aboutTop = 0;
@@ -48,6 +54,7 @@ export function initScrollAnimation(sections: Sections, scene: StageTarget, redu
     problemTop = problem.getBoundingClientRect().top + y;
     sol.measure();
     work?.measure();
+    aria?.measure();
   };
 
   const update = () => {
@@ -62,6 +69,7 @@ export function initScrollAnimation(sections: Sections, scene: StageTarget, redu
       dissolve: range(b, 0.05, 0.85), // hologram -> fragmented system
       ...sol.update(y), // fragments reconnect -> ten services -> settled system
       ...(work ? work.update(y) : {}), // the backdrop recedes behind Selected Work
+      ...(aria ? aria.update(y) : {}), // ARIA: the core forms and the backdrop is brought back
     });
   };
 
